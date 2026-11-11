@@ -1,0 +1,217 @@
+## 1. networks
+
+$ container network create --label com.docker.compose.project=spike fl-a
+fl-a
+[exit 0]
+
+$ container network create fl-b
+fl-b
+[exit 0]
+
+$ container network inspect fl-a
+[
+  {
+    "configuration" : {
+      "creationDate" : "2026-11-11T18:20:52Z",
+      "labels" : {
+        "com.docker.compose.project" : "spike"
+      },
+      "mode" : "nat",
+      "name" : "fl-a",
+      "options" : {
+
+      },
+      "plugin" : "container-network-vmnet"
+    },
+    "id" : "fl-a",
+    "status" : {
+      "ipv4Gateway" : "192.168.65.1",
+      "ipv4Subnet" : "192.168.65.0/24",
+      "ipv6Subnet" : "fd23:c472:8f19:14eb::/64"
+    }
+  }
+]
+[exit 0]
+## 2. containers with aliases
+
+$ container run -d --name fl-db --network fl-a,alias=db,alias=postgres alpine:3.20 sleep 600
+[0/6] [0s]
+[0/6] [1s]
+[1/6] Fetching image [1s]
+[1/6] Fetching image (1 of 2 blobs) [2s]
+[1/6] Fetching image 22% (3 of 4 blobs, 885 KB/3.9 MB, 222 KB/s) [3s]
+[2/6] Unpacking image [3s]
+[2/6] Unpacking image for platform linux/arm64 [3s]
+[3/6] Fetching kernel [3s]
+[4/6] Fetching init image [3s]
+[5/6] Unpacking init image [3s]
+[6/6] Starting container [3s]
+Error: alias "db" must be a fully qualified name with at least 2 labels, such as "api.example.test". Configure a default DNS domain to have the domain added to a name that has none
+[exit 1]
+
+$ container run -d --name fl-web --network fl-a,alias=web alpine:3.20 sleep 600
+[0/6] [0s]
+[1/6] Fetching image [0s]
+[2/6] Unpacking image [0s]
+[3/6] Fetching kernel [0s]
+[4/6] Fetching init image [0s]
+[5/6] Unpacking init image [0s]
+[6/6] Starting container [0s]
+Error: alias "web" must be a fully qualified name with at least 2 labels, such as "api.example.test". Configure a default DNS domain to have the domain added to a name that has none
+[exit 1]
+
+$ container run -d --name fl-other --network fl-b,alias=other alpine:3.20 sleep 600
+[0/6] [0s]
+[1/6] Fetching image [0s]
+[2/6] Unpacking image [0s]
+[3/6] Fetching kernel [0s]
+[4/6] Fetching init image [0s]
+[5/6] Unpacking init image [0s]
+[6/6] Starting container [0s]
+Error: alias "other" must be a fully qualified name with at least 2 labels, such as "api.example.test". Configure a default DNS domain to have the domain added to a name that has none
+[exit 1]
+
+$ container run -d --name fl-multi --network fl-a,alias=multi --network fl-b alpine:3.20 sleep 600
+[0/6] [0s]
+[1/6] Fetching image [0s]
+[2/6] Unpacking image [0s]
+[3/6] Fetching kernel [0s]
+[4/6] Fetching init image [0s]
+[5/6] Unpacking init image [0s]
+[6/6] Starting container [0s]
+Error: alias "multi" must be a fully qualified name with at least 2 labels, such as "api.example.test". Configure a default DNS domain to have the domain added to a name that has none
+[exit 1]
+
+$ container ls --format json
+[]
+[exit 0]
+## 3. guest DNS config
+
+$ container exec fl-web cat /etc/resolv.conf
+Error: get failed: container fl-web not found
+[exit 1]
+
+$ container exec fl-web cat /etc/hosts
+Error: get failed: container fl-web not found
+[exit 1]
+
+$ container exec fl-web ip -4 addr
+Error: get failed: container fl-web not found
+[exit 1]
+## 4. name resolution from fl-web (same network fl-a)
+
+$ container exec fl-web nslookup db
+Error: get failed: container fl-web not found
+[exit 1]
+
+$ container exec fl-web nslookup postgres
+Error: get failed: container fl-web not found
+[exit 1]
+
+$ container exec fl-web nslookup fl-db
+Error: get failed: container fl-web not found
+[exit 1]
+
+$ container exec fl-web nslookup web
+Error: get failed: container fl-web not found
+[exit 1]
+
+$ container exec fl-web nslookup multi
+Error: get failed: container fl-web not found
+[exit 1]
+
+$ container exec fl-web nslookup other
+Error: get failed: container fl-web not found
+[exit 1]
+
+$ container exec fl-web nslookup fl-other
+Error: get failed: container fl-web not found
+[exit 1]
+
+$ container exec fl-web nslookup fl-db.fl-a
+Error: get failed: container fl-web not found
+[exit 1]
+## 5. reachability by IP
+Error: container not found: fl-db
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/Users/jawrsh/.local/share/mise/installs/python/3.12.13/lib/python3.12/json/__init__.py", line 293, in load
+    return loads(fp.read(),
+           ^^^^^^^^^^^^^^^^
+  File "/Users/jawrsh/.local/share/mise/installs/python/3.12.13/lib/python3.12/json/__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jawrsh/.local/share/mise/installs/python/3.12.13/lib/python3.12/json/decoder.py", line 338, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jawrsh/.local/share/mise/installs/python/3.12.13/lib/python3.12/json/decoder.py", line 356, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+fl-db networks: 
+
+$ container exec fl-web ping -c1 -W2 db
+Error: get failed: container fl-web not found
+[exit 1]
+
+$ container exec fl-other ping -c1 -W2 db
+Error: get failed: container fl-other not found
+[exit 1]
+
+$ container exec fl-multi ping -c1 -W2 db
+Error: get failed: container fl-multi not found
+[exit 1]
+
+$ container exec fl-multi ping -c1 -W2 other
+Error: get failed: container fl-multi not found
+[exit 1]
+
+$ container exec fl-multi ip -4 addr
+Error: get failed: container fl-multi not found
+[exit 1]
+## 6. published port to host localhost
+
+$ container run -d --name fl-http --network fl-a,alias=http -p 127.0.0.1:18080:8080 alpine:3.20 sh -c mkdir -p /w && echo fruitlocker-ok > /w/index.html && httpd -f -p 8080 -h /w
+[0/6] [0s]
+[1/6] Fetching image [0s]
+[2/6] Unpacking image [0s]
+[3/6] Fetching kernel [0s]
+[4/6] Fetching init image [0s]
+[5/6] Unpacking init image [0s]
+[6/6] Starting container [0s]
+Error: alias "http" must be a fully qualified name with at least 2 labels, such as "api.example.test". Configure a default DNS domain to have the domain added to a name that has none
+[exit 1]
+
+$ curl -s -m 5 http://127.0.0.1:18080/
+[exit 7]
+
+$ container exec fl-web wget -qO- -T 3 http://http:8080/
+Error: get failed: container fl-web not found
+[exit 1]
+## 7. host reachability from guest
+
+$ container exec fl-web sh -c ip route; wget -qO- -T 3 http://192.168.64.1:18080/ || true
+Error: get failed: container fl-web not found
+[exit 1]
+## 8. IP stability across stop/start
+
+$ container inspect fl-db
+Error: container not found: fl-db
+[exit 1]
+
+$ container stop fl-db
+Error: notFound: "container with ID fl-db not found"
+[exit 1]
+
+$ container start fl-db
+Error: container with ID fl-db not found
+[exit 1]
+
+$ container inspect fl-db
+Error: container not found: fl-db
+[exit 1]
+
+$ container exec fl-web nslookup db
+Error: get failed: container fl-web not found
+[exit 1]
+
+done
