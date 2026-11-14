@@ -44,4 +44,4 @@ A developer installs fruitlocker from the website or `brew install --cask`, it u
 
 - Waits on #15 (Sparkle plus SMAppService spike) because: it blocks the first release.
 - Waits on epic-app and epic-compat-matrix because: the release ships the app and gates on a passing matrix.
-- Assumption: [ASSUMPTION] R18's clean-Mac check is the release gate and lives here, not in epic-compat-matrix, because it needs the notarized install.
+- Assumption: [CONFIRMED by Josh 2026-11-14] R18's clean-Mac check is the release gate and lives here, not in epic-compat-matrix, because it needs the notarized install.

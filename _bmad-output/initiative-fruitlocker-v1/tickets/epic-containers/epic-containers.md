@@ -47,7 +47,7 @@ A developer runs `docker run -d -p 8080:80 nginx`, sees it in `docker ps`, reach
 
 ## Notes
 
-- Assumption: [ASSUMPTION] `stats` and `archive` sit here rather than in epic-logs-exec, since neither waits on #12.
-- Assumption: [ASSUMPTION] This epic will likely run past twelve stories; split it when its stories are planned (for example materialization and lifecycle, then poller and boot reconcile, then ports, stats and cp).
+- Assumption: [CONFIRMED by Josh 2026-11-14] `stats` and `archive` sit here rather than in epic-logs-exec, since neither waits on #12.
+- Assumption: [CONFIRMED by Josh 2026-11-14] This epic will likely run past twelve stories; split it when its stories are planned (for example materialization and lifecycle, then poller and boot reconcile, then ports, stats and cp).
 - Waits on epic-images because: `docker run` needs a pulled image and its ID.
-- Assumption: [ASSUMPTION] To keep epics 5 to 8 from colliding in `ContainerService`, this epic owns the lifecycle extension points and later epics only plug in, rather than serializing epics 5 to 8. Josh to confirm.
+- Assumption: [CONFIRMED by Josh 2026-11-14] To keep epics 5 to 8 from colliding in `ContainerService`, this epic owns the lifecycle extension points and later epics only plug in, rather than serializing epics 5 to 8. Josh to confirm.

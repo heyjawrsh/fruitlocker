@@ -43,4 +43,4 @@ A developer runs `docker build -t app .` and `docker compose build` on an existi
 - Waits on #11 (build via buildx and Bake spike) because: it decides whether and how v1 builds; its outcome may reshape or drop this epic and corrects the addendum's `/build` line.
 - Waits on epic-images because: it needs the Apple image store adapter and registry auth.
 - Waits on epic-containers because: Done when needs `docker run` to prove the built image runs.
-- Assumption: [ASSUMPTION] No Requirements or story plan until #11 reports; refining this epic before then would re-decide what the spike settles.
+- Assumption: [CONFIRMED by Josh 2026-11-14] No Requirements or story plan until #11 reports; refining this epic before then would re-decide what the spike settles.

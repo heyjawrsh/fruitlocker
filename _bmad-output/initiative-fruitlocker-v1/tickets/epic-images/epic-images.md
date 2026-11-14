@@ -43,4 +43,4 @@ A developer runs `docker pull` and `docker push` against their usual registries 
 
 ## Notes
 
-- Assumption: [ASSUMPTION] The `Resolver` and per-object FIFO lock land in this epic because it is the first with Docker objects; later epics reuse them.
+- Assumption: [CONFIRMED by Josh 2026-11-14] The `Resolver` and per-object FIFO lock land in this epic because it is the first with Docker objects; later epics reuse them.

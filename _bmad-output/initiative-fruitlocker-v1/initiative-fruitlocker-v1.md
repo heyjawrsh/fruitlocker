@@ -80,18 +80,18 @@ A professional developer on an Apple silicon Mac switches their Docker context t
 
 ## Notes
 
-- Assumption: [ASSUMPTION] v1 is one initiative with epics, not a parent over several initiatives: one product, one solo maintainer, one release.
-- Assumption: [ASSUMPTION] Adoption targets (stars, contributors, cask installs, triage time) are the Outcome's signal, not Requirements lines: no epic can build them.
+- Assumption: [CONFIRMED by Josh 2026-11-14] v1 is one initiative with epics, not a parent over several initiatives: one product, one solo maintainer, one release.
+- Assumption: [CONFIRMED by Josh 2026-11-14] Adoption targets (stars, contributors, cask installs, triage time) are the Outcome's signal, not Requirements lines: no epic can build them.
 - Open question: Who hosts the self-hosted Apple silicon runner for the compatibility matrix? Josh decides; blocks the public matrix (spine Deferred).
 - Open question: If the build spike (#11) fails, Josh amends the v1 gate for `build`; epic-build waits on that call (spine Deferred).
 - Decision: 2026-11-14 Sliced by "one source capability per epic, delivered together"; module boundaries are not epic boundaries because everything ships in one bundle (slice.md rule).
-- Decision: 2026-11-14 [ASSUMPTION] Networks and Compose DNS are separate epics: #14 blocks only `FLDNS`, and plain user networks are usable by Compose before names resolve.
-- Decision: 2026-11-14 [ASSUMPTION] Images come before containers: `docker run` needs a pulled image, so the images epic is the first one with Docker objects.
-- Decision: 2026-11-14 [ASSUMPTION] The opening epic carries the platform baseline: package scaffold, CI on hosted macOS against fakes, a Developer ID signed bundle that registers the daemon LaunchAgent with `SMAppService`, and a local compatibility runner. Notarization, Sparkle, cask and uninstall wait for epic-release.
-- Decision: 2026-11-14 [ASSUMPTION] `EventBus` and the `/events` endpoint land in the opening epic; each later epic adds its own emitters from the Conventions table. The poller, intent ledger and record-exit land with containers.
-- Decision: 2026-11-14 [ASSUMPTION] Container `stats` and `archive` sit in epic-containers, not epic-logs-exec, because neither waits on the stdio spike (#12).
-- Decision: 2026-11-14 [ASSUMPTION] Logs and exec come before restart and health: `logs` and `exec` are v1 gate commands for Compose, restart and health are not named in the gate.
-- Decision: 2026-11-14 [ASSUMPTION] The public matrix and self-hosted runner are their own epic near the end; earlier epics run their integrated checks on the local compatibility runner on Josh's Mac.
-- Decision: 2026-11-14 [ASSUMPTION] Tree check found epics 5 to 8 would collide in `ContainerService` start and stop paths. epic-containers owns the extension points (`NetworkLifecycle` no-op, start-operation hook, `inspect` assembly) instead of serializing 5 to 8. Also added: volumes after networks, restart-health after logs-exec, logs-exec and restart-health after networks, build after containers.
+- Decision: 2026-11-14 [CONFIRMED by Josh 2026-11-14] Networks and Compose DNS are separate epics: #14 blocks only `FLDNS`, and plain user networks are usable by Compose before names resolve.
+- Decision: 2026-11-14 [CONFIRMED by Josh 2026-11-14] Images come before containers: `docker run` needs a pulled image, so the images epic is the first one with Docker objects.
+- Decision: 2026-11-14 [CONFIRMED by Josh 2026-11-14] The opening epic carries the platform baseline: package scaffold, CI on hosted macOS against fakes, a Developer ID signed bundle that registers the daemon LaunchAgent with `SMAppService`, and a local compatibility runner. Notarization, Sparkle, cask and uninstall wait for epic-release.
+- Decision: 2026-11-14 [CONFIRMED by Josh 2026-11-14] `EventBus` and the `/events` endpoint land in the opening epic; each later epic adds its own emitters from the Conventions table. The poller, intent ledger and record-exit land with containers.
+- Decision: 2026-11-14 [CONFIRMED by Josh 2026-11-14] Container `stats` and `archive` sit in epic-containers, not epic-logs-exec, because neither waits on the stdio spike (#12).
+- Decision: 2026-11-14 [CONFIRMED by Josh 2026-11-14] Logs and exec come before restart and health: `logs` and `exec` are v1 gate commands for Compose, restart and health are not named in the gate.
+- Decision: 2026-11-14 [CONFIRMED by Josh 2026-11-14] The public matrix and self-hosted runner are their own epic near the end; earlier epics run their integrated checks on the local compatibility runner on Josh's Mac.
+- Decision: 2026-11-14 [CONFIRMED by Josh 2026-11-14] Tree check found epics 5 to 8 would collide in `ContainerService` start and stop paths. epic-containers owns the extension points (`NetworkLifecycle` no-op, start-operation hook, `inspect` assembly) instead of serializing 5 to 8. Also added: volumes after networks, restart-health after logs-exec, logs-exec and restart-health after networks, build after containers.
 - Open question: How does the field table spot Docker-in-Docker beyond `--privileged` (for example a mounted `docker.sock`) for R13? Settled when epic-engine-foundation is refined.
 - Decision: 2026-11-14 Spine already settles shared decisions; no `bmad-architecture` run and no opening-epic decision stories. App UI structure goes to `bmad-ux` when epic-app is refined (spine Deferred).
