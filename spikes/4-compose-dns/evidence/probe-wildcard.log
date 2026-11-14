@@ -1,0 +1,7 @@
+BOUND 0.0.0.0:53
+QUERY from 192.168.64.3:49847 name=db.k7q2.fruitlocker.internal type=1
+QUERY from 192.168.64.3:49847 name=db.k7q2.fruitlocker.internal type=28
+QUERY from 192.168.64.3:49847 name=db.k7q2.fruitlocker.internal type=1
+QUERY from 192.168.64.3:49847 name=db.k7q2.fruitlocker.internal type=28
+QUERY from 192.168.64.3:51633 name=example.com type=1
+QUERY from 192.168.64.3:51633 name=example.com type=28

@@ -1,0 +1,383 @@
+## 0. baseline: vmnet default DNS, resolver not running
+
+$ container run --rm alpine:3.20 sh -c apk add -q bind-tools >/dev/null 2>&1; for i in 1 2 3 4 5; do dig +noall +stats example.com | grep "Query time"; done
+;; Query time: 40 msec
+;; Query time: 4 msec
+;; Query time: 4 msec
+;; Query time: 4 msec
+;; Query time: 0 msec
+[exit 0]
+## 1. start resolver
+Traceback (most recent call last):
+  File "/Users/jawrsh/Work/OSS/fruitlocker/spikes/4-compose-dns/flresolver.py", line 216, in <module>
+    main()
+## 2. projects: pa (db, web x2, multi on 2 nets, tools) and pb (db, tools)
+[0/6] [0s]
+[1/6] Fetching image [0s]
+[2/6] Unpacking image [0s]
+[3/6] Fetching kernel [0s]
+[4/6] Fetching init image [0s]
+[5/6] Unpacking init image [0s]
+[6/6] Starting container [0s]
+[6/6] Starting container [0s]
+[0/6] [0s]
+[1/6] Fetching image [0s]
+[2/6] Unpacking image [0s]
+[3/6] Fetching kernel [0s]
+[4/6] Fetching init image [0s]
+[5/6] Unpacking init image [0s]
+[6/6] Starting container [0s]
+[6/6] Starting container [0s]
+[0/6] [0s]
+[1/6] Fetching image [0s]
+[2/6] Unpacking image [0s]
+[3/6] Fetching kernel [0s]
+[4/6] Fetching init image [0s]
+[5/6] Unpacking init image [0s]
+[6/6] Starting container [0s]
+[6/6] Starting container [0s]
+[0/6] [0s]
+[1/6] Fetching image [0s]
+[2/6] Unpacking image [0s]
+[3/6] Fetching kernel [0s]
+[4/6] Fetching init image [0s]
+[5/6] Unpacking init image [0s]
+[6/6] Starting container [0s]
+[6/6] Starting container [0s]
+[0/6] [0s]
+[1/6] Fetching image [0s]
+[2/6] Unpacking image [0s]
+[3/6] Fetching kernel [0s]
+[4/6] Fetching init image [0s]
+[5/6] Unpacking init image [0s]
+[6/6] Starting container [0s]
+[6/6] Starting container [0s]
+[0/6] [0s]
+[1/6] Fetching image [0s]
+[2/6] Unpacking image [0s]
+[3/6] Fetching kernel [0s]
+[4/6] Fetching init image [0s]
+[5/6] Unpacking init image [0s]
+[6/6] Starting container [0s]
+[6/6] Starting container [0s]
+[0/6] [0s]
+[1/6] Fetching image [0s]
+[2/6] Unpacking image [0s]
+[3/6] Fetching kernel [0s]
+[4/6] Fetching init image [0s]
+[5/6] Unpacking init image [0s]
+[6/6] Starting container [0s]
+[6/6] Starting container [0s]
+
+$ container ls
+ID          IMAGE                          OS     ARCH   STATE    IP                               CPUS  MEMORY   STARTED
+pb-db-1     docker.io/library/alpine:3.20  linux  arm64  running  192.168.67.2/24                  4     1024 MB  2026-11-11T19:04:09Z
+pb-tools-1  docker.io/library/alpine:3.20  linux  arm64  running  192.168.67.3/24                  4     1024 MB  2026-11-11T19:04:10Z
+pa-multi-1  docker.io/library/alpine:3.20  linux  arm64  running  192.168.65.5/24,192.168.66.2/24  4     1024 MB  2026-11-11T19:04:08Z
+pa-tools-1  docker.io/library/alpine:3.20  linux  arm64  running  192.168.66.3/24                  4     1024 MB  2026-11-11T19:04:09Z
+pa-db-1     docker.io/library/alpine:3.20  linux  arm64  running  192.168.65.2/24                  4     1024 MB  2026-11-11T19:04:06Z
+pa-web-2    docker.io/library/alpine:3.20  linux  arm64  running  192.168.65.4/24                  4     1024 MB  2026-11-11T19:04:07Z
+pa-web-1    docker.io/library/alpine:3.20  linux  arm64  running  192.168.65.3/24                  4     1024 MB  2026-11-11T19:04:06Z
+[exit 0]
+## 3. pa-web-1 (pa_default)
+
+$ container exec pa-web-1 nslookup db
+Server:		192.168.65.1
+Address:	192.168.65.1:53
+
+** server can't find db: NXDOMAIN
+
+** server can't find db: NXDOMAIN
+
+[exit 1]
+
+$ container exec pa-web-1 nslookup postgres
+Server:		192.168.65.1
+Address:	192.168.65.1:53
+
+** server can't find postgres: NXDOMAIN
+
+** server can't find postgres: NXDOMAIN
+
+[exit 1]
+
+$ container exec pa-web-1 nslookup web
+Server:		192.168.65.1
+Address:	192.168.65.1:53
+
+Non-authoritative answer:
+
+Non-authoritative answer:
+
+[exit 0]
+
+$ container exec pa-web-1 nslookup pa-db-1
+Server:		192.168.65.1
+Address:	192.168.65.1:53
+
+** server can't find pa-db-1: NXDOMAIN
+
+** server can't find pa-db-1: NXDOMAIN
+
+[exit 1]
+
+$ container exec pa-web-1 nslookup multi
+Server:		192.168.65.1
+Address:	192.168.65.1:53
+
+** server can't find multi: NXDOMAIN
+
+** server can't find multi: NXDOMAIN
+
+[exit 1]
+
+$ container exec pa-web-1 nslookup tools
+Server:		192.168.65.1
+Address:	192.168.65.1:53
+
+Non-authoritative answer:
+
+Non-authoritative answer:
+
+[exit 0]
+
+$ container exec pa-web-1 nslookup pb-db-1
+Server:		192.168.65.1
+Address:	192.168.65.1:53
+
+** server can't find pb-db-1: NXDOMAIN
+
+** server can't find pb-db-1: NXDOMAIN
+
+[exit 1]
+
+$ container exec pa-web-1 nslookup example.com
+Server:		192.168.65.1
+Address:	192.168.65.1:53
+
+Non-authoritative answer:
+Name:	example.com
+Address: 104.20.23.154
+Name:	example.com
+Address: 172.66.147.243
+
+Non-authoritative answer:
+Name:	example.com
+Address: 2606:4700:10::ac42:93f3
+Name:	example.com
+Address: 2606:4700:10::6814:179a
+
+[exit 0]
+## 4. pb-tools-1 (pb_default): its own db, nothing from pa
+
+$ container exec pb-tools-1 nslookup db
+Server:		192.168.67.1
+Address:	192.168.67.1:53
+
+** server can't find db: NXDOMAIN
+
+** server can't find db: NXDOMAIN
+
+[exit 1]
+
+$ container exec pb-tools-1 nslookup web
+Server:		192.168.67.1
+Address:	192.168.67.1:53
+
+Non-authoritative answer:
+
+Non-authoritative answer:
+
+[exit 0]
+
+$ container exec pb-tools-1 nslookup postgres
+Server:		192.168.67.1
+Address:	192.168.67.1:53
+
+** server can't find postgres: NXDOMAIN
+
+** server can't find postgres: NXDOMAIN
+
+[exit 1]
+## 5. pa-multi-1 (pa_default + pa_back): sees both
+
+$ container exec pa-multi-1 nslookup db
+Server:		192.168.65.1
+Address:	192.168.65.1:53
+
+** server can't find db: NXDOMAIN
+
+** server can't find db: NXDOMAIN
+
+[exit 1]
+
+$ container exec pa-multi-1 nslookup tools
+Server:		192.168.65.1
+Address:	192.168.65.1:53
+
+Non-authoritative answer:
+
+Non-authoritative answer:
+
+[exit 0]
+
+$ container exec pa-multi-1 nslookup web
+Server:		192.168.65.1
+Address:	192.168.65.1:53
+
+Non-authoritative answer:
+
+Non-authoritative answer:
+
+[exit 0]
+## 6. pa-tools-1 (pa_back only): sees multi, not db
+
+$ container exec pa-tools-1 nslookup multi
+Server:		192.168.66.1
+Address:	192.168.66.1:53
+
+** server can't find multi: NXDOMAIN
+
+** server can't find multi: NXDOMAIN
+
+[exit 1]
+
+$ container exec pa-tools-1 nslookup db
+Server:		192.168.66.1
+Address:	192.168.66.1:53
+
+** server can't find db: NXDOMAIN
+
+** server can't find db: NXDOMAIN
+
+[exit 1]
+## 7. connectivity by name
+
+$ container exec pa-web-1 ping -c1 -W2 db
+ping: bad address 'db'
+[exit 1]
+
+$ container exec pb-tools-1 ping -c1 -W2 db
+ping: bad address 'db'
+[exit 1]
+## 8. scaled service round-robin (10 lookups of web from pa-db-1)
+
+$ container exec pa-db-1 sh -c for i in 1 2 3 4 5 6 7 8 9 10; do nslookup -type=a web 2>/dev/null | awk "/^Address: /{print \$2; exit}"; done | sort | uniq -c
+[exit 0]
+## 9. restart: name follows new IP
+
+$ container stop pa-db-1
+pa-db-1
+[exit 0]
+
+$ container exec pa-web-1 nslookup db
+Server:		192.168.65.1
+Address:	192.168.65.1:53
+
+** server can't find db: NXDOMAIN
+
+** server can't find db: NXDOMAIN
+
+[exit 1]
+
+$ container start pa-db-1
+pa-db-1
+[exit 0]
+
+$ container ls
+ID          IMAGE                          OS     ARCH   STATE    IP                               CPUS  MEMORY   STARTED
+pb-db-1     docker.io/library/alpine:3.20  linux  arm64  running  192.168.67.2/24                  4     1024 MB  2026-11-11T19:04:09Z
+pb-tools-1  docker.io/library/alpine:3.20  linux  arm64  running  192.168.67.3/24                  4     1024 MB  2026-11-11T19:04:10Z
+pa-multi-1  docker.io/library/alpine:3.20  linux  arm64  running  192.168.65.5/24,192.168.66.2/24  4     1024 MB  2026-11-11T19:04:08Z
+pa-tools-1  docker.io/library/alpine:3.20  linux  arm64  running  192.168.66.3/24                  4     1024 MB  2026-11-11T19:04:09Z
+pa-db-1     docker.io/library/alpine:3.20  linux  arm64  running  192.168.65.6/24                  4     1024 MB  2026-11-11T19:04:22Z
+pa-web-2    docker.io/library/alpine:3.20  linux  arm64  running  192.168.65.4/24                  4     1024 MB  2026-11-11T19:04:07Z
+pa-web-1    docker.io/library/alpine:3.20  linux  arm64  running  192.168.65.3/24                  4     1024 MB  2026-11-11T19:04:06Z
+[exit 0]
+
+$ container exec pa-web-1 nslookup db
+Server:		192.168.65.1
+Address:	192.168.65.1:53
+
+** server can't find db: NXDOMAIN
+
+** server can't find db: NXDOMAIN
+
+[exit 1]
+## 10. forwarding: internet, apk, split DNS via scutil
+
+$ container exec pa-web-1 sh -c apk add -q bind-tools >/dev/null 2>&1 && echo apk-ok
+apk-ok
+[exit 0]
+
+$ container exec pa-web-1 sh -c for i in 1 2 3 4 5; do dig +noall +stats example.com | grep "Query time"; done
+;; Query time: 0 msec
+;; Query time: 4 msec
+;; Query time: 4 msec
+;; Query time: 4 msec
+;; Query time: 4 msec
+[exit 0]
+
+$ container exec pa-web-1 sh -c for i in 1 2 3 4 5; do dig +noall +stats db | grep "Query time"; done
+;; Query time: 4 msec
+;; Query time: 4 msec
+;; Query time: 4 msec
+;; Query time: 4 msec
+;; Query time: 0 msec
+[exit 0]
+
+$ container exec pa-web-1 dig +short MX gmail.com
+10 alt1.gmail-smtp-in.l.google.com.
+20 alt2.gmail-smtp-in.l.google.com.
+40 alt4.gmail-smtp-in.l.google.com.
+5 gmail-smtp-in.l.google.com.
+30 alt3.gmail-smtp-in.l.google.com.
+[exit 0]
+
+$ container exec pa-web-1 dig +short TXT example.com
+"v=spf1 -all"
+"_k2n1y4vw3qtb4skdx9e7dxt97qrmmq9"
+[exit 0]
+## 11. non-vmnet source is dropped (query from this Mac to its LAN IP)
+
+$ dig +tries=1 +time=2 @10.0.7.40 example.com
+
+; <<>> DiG 9.10.6 <<>> +tries=1 +time=2 @10.0.7.40 example.com
+; (1 server found)
+;; global options: +cmd
+;; connection timed out; no servers could be reached
+[exit 9]
+## 12. resolver stops: guests fall back to vmnet default
+spikes/4-compose-dns/run.sh:kill:81: kill 73063 failed: no such process
+
+$ container exec pa-web-1 nslookup example.com
+Server:		192.168.65.1
+Address:	192.168.65.1#53
+
+Non-authoritative answer:
+Name:	example.com
+Address: 104.20.23.154
+Name:	example.com
+Address: 172.66.147.243
+Name:	example.com
+Address: 2606:4700:10::ac42:93f3
+Name:	example.com
+Address: 2606:4700:10::6814:179a
+
+[exit 0]
+
+$ container exec pa-web-1 nslookup db
+Server:		192.168.65.1
+Address:	192.168.65.1#53
+
+** server can't find db: NXDOMAIN
+
+[exit 1]
+
+## resolver log
+Traceback (most recent call last):
+  File "/Users/jawrsh/Work/OSS/fruitlocker/spikes/4-compose-dns/flresolver.py", line 216, in <module>
+    main()
+  File "/Users/jawrsh/Work/OSS/fruitlocker/spikes/4-compose-dns/flresolver.py", line 176, in main
+    s.bind(("0.0.0.0", 53))
+OSError: [Errno 48] Address already in use

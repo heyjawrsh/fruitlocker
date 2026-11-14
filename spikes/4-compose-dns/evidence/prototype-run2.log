@@ -1,0 +1,396 @@
+## 1. start resolver (must win :53 before any guest does DNS; mDNSResponder grabs it on demand)
+:53 free
+13:05:43 listening on 0.0.0.0:53/udp
+13:05:45 upstreams: [('<split-domain-1>', '<split-dns-server>', 53), ('<split-domain-2>', '<split-dns-server>', 53), (None, '10.0.7.1', 53)]
+udp4 *.53 00000
+## 2. projects: pa (db, web x2, multi on 2 nets, tools) and pb (db, tools)
+
+$ container ls
+ID          IMAGE                          OS     ARCH   STATE    IP                               CPUS  MEMORY   STARTED
+pb-db-1     docker.io/library/alpine:3.20  linux  arm64  running  192.168.67.2/24                  4     1024 MB  2026-11-11T19:05:49Z
+pb-tools-1  docker.io/library/alpine:3.20  linux  arm64  running  192.168.67.3/24                  4     1024 MB  2026-11-11T19:05:50Z
+pa-multi-1  docker.io/library/alpine:3.20  linux  arm64  running  192.168.65.5/24,192.168.66.2/24  4     1024 MB  2026-11-11T19:05:48Z
+pa-tools-1  docker.io/library/alpine:3.20  linux  arm64  running  192.168.66.3/24                  4     1024 MB  2026-11-11T19:05:49Z
+pa-db-1     docker.io/library/alpine:3.20  linux  arm64  running  192.168.65.2/24                  4     1024 MB  2026-11-11T19:05:46Z
+pa-web-2    docker.io/library/alpine:3.20  linux  arm64  running  192.168.65.4/24                  4     1024 MB  2026-11-11T19:05:47Z
+pa-web-1    docker.io/library/alpine:3.20  linux  arm64  running  192.168.65.3/24                  4     1024 MB  2026-11-11T19:05:47Z
+[exit 0]
+## 3. pa-web-1 (pa_default)
+
+$ container exec pa-web-1 nslookup db
+Server:		192.168.65.1
+Address:	192.168.65.1:53
+
+Name:	db
+Address: 192.168.65.2
+
+
+[exit 0]
+
+$ container exec pa-web-1 nslookup postgres
+Server:		192.168.65.1
+Address:	192.168.65.1:53
+
+Name:	postgres
+Address: 192.168.65.2
+
+
+[exit 0]
+
+$ container exec pa-web-1 nslookup web
+Server:		192.168.65.1
+Address:	192.168.65.1:53
+
+Name:	web
+Address: 192.168.65.3
+Name:	web
+Address: 192.168.65.4
+
+
+[exit 0]
+
+$ container exec pa-web-1 nslookup pa-db-1
+Server:		192.168.65.1
+Address:	192.168.65.1:53
+
+Name:	pa-db-1
+Address: 192.168.65.2
+
+
+[exit 0]
+
+$ container exec pa-web-1 nslookup multi
+Server:		192.168.65.1
+Address:	192.168.65.1:53
+
+Name:	multi
+Address: 192.168.65.5
+
+
+[exit 0]
+
+$ container exec pa-web-1 nslookup tools
+Server:		192.168.65.1
+Address:	192.168.65.1:53
+
+** server can't find tools: NXDOMAIN
+
+** server can't find tools: NXDOMAIN
+
+[exit 1]
+
+$ container exec pa-web-1 nslookup pb-db-1
+Server:		192.168.65.1
+Address:	192.168.65.1:53
+
+** server can't find pb-db-1: NXDOMAIN
+
+** server can't find pb-db-1: NXDOMAIN
+
+[exit 1]
+
+$ container exec pa-web-1 nslookup example.com
+Server:		192.168.65.1
+Address:	192.168.65.1:53
+
+Non-authoritative answer:
+Name:	example.com
+Address: 172.66.147.243
+Name:	example.com
+Address: 104.20.23.154
+
+Non-authoritative answer:
+Name:	example.com
+Address: 2606:4700:10::6814:179a
+Name:	example.com
+Address: 2606:4700:10::ac42:93f3
+
+[exit 0]
+## 4. pb-tools-1 (pb_default): its own db, nothing from pa
+
+$ container exec pb-tools-1 nslookup db
+Server:		192.168.67.1
+Address:	192.168.67.1:53
+
+Name:	db
+Address: 192.168.67.2
+
+
+[exit 0]
+
+$ container exec pb-tools-1 nslookup web
+Server:		192.168.67.1
+Address:	192.168.67.1:53
+
+** server can't find web: NXDOMAIN
+
+** server can't find web: NXDOMAIN
+
+[exit 1]
+
+$ container exec pb-tools-1 nslookup postgres
+Server:		192.168.67.1
+Address:	192.168.67.1:53
+
+** server can't find postgres: NXDOMAIN
+
+** server can't find postgres: NXDOMAIN
+
+[exit 1]
+## 5. pa-multi-1 (pa_default + pa_back): sees both
+
+$ container exec pa-multi-1 nslookup db
+Server:		192.168.65.1
+Address:	192.168.65.1:53
+
+Name:	db
+Address: 192.168.65.2
+
+
+[exit 0]
+
+$ container exec pa-multi-1 nslookup tools
+Server:		192.168.65.1
+Address:	192.168.65.1:53
+
+Name:	tools
+Address: 192.168.66.3
+
+
+[exit 0]
+
+$ container exec pa-multi-1 nslookup web
+Server:		192.168.65.1
+Address:	192.168.65.1:53
+
+Name:	web
+Address: 192.168.65.4
+Name:	web
+Address: 192.168.65.3
+
+
+[exit 0]
+## 6. pa-tools-1 (pa_back only): sees multi, not db
+
+$ container exec pa-tools-1 nslookup multi
+Server:		192.168.66.1
+Address:	192.168.66.1:53
+
+Name:	multi
+Address: 192.168.66.2
+
+
+[exit 0]
+
+$ container exec pa-tools-1 nslookup db
+Server:		192.168.66.1
+Address:	192.168.66.1:53
+
+** server can't find db: NXDOMAIN
+
+** server can't find db: NXDOMAIN
+
+[exit 1]
+## 7. connectivity by name
+
+$ container exec pa-web-1 ping -c1 -W2 db
+PING db (192.168.65.2): 56 data bytes
+64 bytes from 192.168.65.2: seq=0 ttl=64 time=0.738 ms
+
+--- db ping statistics ---
+1 packets transmitted, 1 packets received, 0% packet loss
+round-trip min/avg/max = 0.738/0.738/0.738 ms
+[exit 0]
+
+$ container exec pb-tools-1 ping -c1 -W2 db
+PING db (192.168.67.2): 56 data bytes
+64 bytes from 192.168.67.2: seq=0 ttl=64 time=0.961 ms
+
+--- db ping statistics ---
+1 packets transmitted, 1 packets received, 0% packet loss
+round-trip min/avg/max = 0.961/0.961/0.961 ms
+[exit 0]
+## 8. scaled service round-robin (10 lookups of web from pa-db-1)
+
+$ container exec pa-db-1 sh -c for i in 1 2 3 4 5 6 7 8 9 10; do nslookup -type=a web 2>/dev/null | awk "/^Address: /{print \$2; exit}"; done | sort | uniq -c
+      6 192.168.65.3
+      4 192.168.65.4
+[exit 0]
+## 9. restart: name follows new IP
+
+$ container stop pa-db-1
+pa-db-1
+[exit 0]
+
+$ container exec pa-web-1 nslookup db
+Server:		192.168.65.1
+Address:	192.168.65.1:53
+
+** server can't find db: NXDOMAIN
+
+** server can't find db: NXDOMAIN
+
+[exit 1]
+
+$ container start pa-db-1
+pa-db-1
+[exit 0]
+
+$ container ls
+ID          IMAGE                          OS     ARCH   STATE    IP                               CPUS  MEMORY   STARTED
+pb-db-1     docker.io/library/alpine:3.20  linux  arm64  running  192.168.67.2/24                  4     1024 MB  2026-11-11T19:05:49Z
+pb-tools-1  docker.io/library/alpine:3.20  linux  arm64  running  192.168.67.3/24                  4     1024 MB  2026-11-11T19:05:50Z
+pa-multi-1  docker.io/library/alpine:3.20  linux  arm64  running  192.168.65.5/24,192.168.66.2/24  4     1024 MB  2026-11-11T19:05:48Z
+pa-tools-1  docker.io/library/alpine:3.20  linux  arm64  running  192.168.66.3/24                  4     1024 MB  2026-11-11T19:05:49Z
+pa-db-1     docker.io/library/alpine:3.20  linux  arm64  running  192.168.65.6/24                  4     1024 MB  2026-11-11T19:06:02Z
+pa-web-2    docker.io/library/alpine:3.20  linux  arm64  running  192.168.65.4/24                  4     1024 MB  2026-11-11T19:05:47Z
+pa-web-1    docker.io/library/alpine:3.20  linux  arm64  running  192.168.65.3/24                  4     1024 MB  2026-11-11T19:05:47Z
+[exit 0]
+
+$ container exec pa-web-1 nslookup db
+Server:		192.168.65.1
+Address:	192.168.65.1:53
+
+Name:	db
+Address: 192.168.65.6
+
+
+[exit 0]
+## 10. forwarding: internet, apk, split DNS via scutil
+
+$ container exec pa-web-1 sh -c apk add -q bind-tools >/dev/null 2>&1 && echo apk-ok
+apk-ok
+[exit 0]
+
+$ container exec pa-web-1 sh -c for i in 1 2 3 4 5; do dig +noall +stats example.com | grep "Query time"; done
+;; Query time: 12 msec
+;; Query time: 12 msec
+;; Query time: 20 msec
+;; Query time: 16 msec
+;; Query time: 20 msec
+[exit 0]
+
+$ container exec pa-web-1 sh -c for i in 1 2 3 4 5; do dig +noall +stats db | grep "Query time"; done
+;; Query time: 4 msec
+;; Query time: 4 msec
+;; Query time: 4 msec
+;; Query time: 4 msec
+;; Query time: 4 msec
+[exit 0]
+
+$ container exec pa-web-1 dig +short MX gmail.com
+10 alt1.gmail-smtp-in.l.google.com.
+40 alt4.gmail-smtp-in.l.google.com.
+5 gmail-smtp-in.l.google.com.
+20 alt2.gmail-smtp-in.l.google.com.
+30 alt3.gmail-smtp-in.l.google.com.
+[exit 0]
+
+$ container exec pa-web-1 dig +short TXT example.com
+"v=spf1 -all"
+"_k2n1y4vw3qtb4skdx9e7dxt97qrmmq9"
+[exit 0]
+## 11. non-vmnet source is dropped (query from this Mac to its LAN IP)
+
+$ dig +tries=1 +time=2 @10.0.7.40 example.com
+
+; <<>> DiG 9.10.6 <<>> +tries=1 +time=2 @10.0.7.40 example.com
+; (1 server found)
+;; global options: +cmd
+;; connection timed out; no servers could be reached
+[exit 9]
+## 12. resolver stops: guests fall back to vmnet default
+
+$ container exec pa-web-1 nslookup example.com
+;; communications error to 192.168.65.1#53: connection refused
+;; communications error to 192.168.65.1#53: connection refused
+;; communications error to 192.168.65.1#53: connection refused
+;; no servers could be reached
+
+[exit 1]
+
+$ container exec pa-web-1 nslookup db
+;; communications error to 192.168.65.1#53: connection refused
+;; communications error to 192.168.65.1#53: connection refused
+;; communications error to 192.168.65.1#53: connection refused
+;; no servers could be reached
+
+[exit 1]
+## 13. baseline: vmnet default DNS (mDNSResponder proxy), resolver stopped
+
+$ container run --rm alpine:3.20 sh -c apk add -q bind-tools >/dev/null 2>&1; for i in 1 2 3 4 5; do dig +noall +stats example.com | grep "Query time"; done
+sh: dig: not found
+sh: dig: not found
+sh: dig: not found
+sh: dig: not found
+sh: dig: not found
+[exit 1]
+
+## resolver log
+13:05:43 listening on 0.0.0.0:53/udp
+13:05:45 upstreams: [('<split-domain-1>', '<split-dns-server>', 53), ('<split-domain-2>', '<split-dns-server>', 53), (None, '10.0.7.1', 53)]
+13:05:52 192.168.65.3 via 192.168.65.1 db type=1 local ['192.168.65.2'] 0.2ms
+13:05:52 192.168.65.3 via 192.168.65.1 db type=28 local ['192.168.65.2'] 0.1ms
+13:05:52 192.168.65.3 via 192.168.65.1 postgres type=1 local ['192.168.65.2'] 0.2ms
+13:05:52 192.168.65.3 via 192.168.65.1 postgres type=28 local ['192.168.65.2'] 0.3ms
+13:05:53 192.168.65.3 via 192.168.65.1 web type=1 local ['192.168.65.3', '192.168.65.4'] 0.2ms
+13:05:53 192.168.65.3 via 192.168.65.1 web type=28 local ['192.168.65.3', '192.168.65.4'] 0.9ms
+13:05:53 192.168.65.3 via 192.168.65.1 pa-db-1 type=1 local ['192.168.65.2'] 0.1ms
+13:05:53 192.168.65.3 via 192.168.65.1 pa-db-1 type=28 local ['192.168.65.2'] 0.2ms
+13:05:53 192.168.65.3 via 192.168.65.1 multi type=1 local ['192.168.65.5'] 0.2ms
+13:05:53 192.168.65.3 via 192.168.65.1 multi type=28 local ['192.168.65.5'] 0.1ms
+13:05:53 192.168.65.3 via 192.168.65.1 tools type=1 local NXDOMAIN 0.2ms
+13:05:53 192.168.65.3 via 192.168.65.1 tools type=28 local NXDOMAIN 0.0ms
+13:05:53 192.168.65.3 via 192.168.65.1 pb-db-1 type=1 local NXDOMAIN 0.3ms
+13:05:53 192.168.65.3 via 192.168.65.1 pb-db-1 type=28 local NXDOMAIN 0.1ms
+13:05:53 192.168.65.3 via 192.168.65.1 example.com type=1 forward -> default 10.0.7.1:53 9.2ms
+13:05:53 192.168.65.3 via 192.168.65.1 example.com type=28 forward -> default 10.0.7.1:53 8.6ms
+13:05:53 192.168.67.3 via 192.168.67.1 db type=1 local ['192.168.67.2'] 0.2ms
+13:05:53 192.168.67.3 via 192.168.67.1 db type=28 local ['192.168.67.2'] 0.0ms
+13:05:53 192.168.67.3 via 192.168.67.1 web type=1 local NXDOMAIN 0.2ms
+13:05:53 192.168.67.3 via 192.168.67.1 web type=28 local NXDOMAIN 0.0ms
+13:05:53 192.168.67.3 via 192.168.67.1 postgres type=1 local NXDOMAIN 0.2ms
+13:05:53 192.168.67.3 via 192.168.67.1 postgres type=28 local NXDOMAIN 0.0ms
+13:05:53 192.168.65.5 via 192.168.65.1 db type=1 local ['192.168.65.2'] 0.2ms
+13:05:53 192.168.65.5 via 192.168.65.1 db type=28 local ['192.168.65.2'] 0.1ms
+13:05:53 192.168.65.5 via 192.168.65.1 tools type=1 local ['192.168.66.3'] 0.2ms
+13:05:53 192.168.65.5 via 192.168.65.1 tools type=28 local ['192.168.66.3'] 0.1ms
+13:05:53 192.168.65.5 via 192.168.65.1 web type=1 local ['192.168.65.4', '192.168.65.3'] 0.1ms
+13:05:53 192.168.65.5 via 192.168.65.1 web type=28 local ['192.168.65.3', '192.168.65.4'] 0.2ms
+13:05:53 192.168.66.3 via 192.168.66.1 multi type=1 local ['192.168.66.2'] 0.3ms
+13:05:53 192.168.66.3 via 192.168.66.1 multi type=28 local ['192.168.66.2'] 0.1ms
+13:05:53 192.168.66.3 via 192.168.66.1 db type=1 local NXDOMAIN 0.2ms
+13:05:53 192.168.66.3 via 192.168.66.1 db type=28 local NXDOMAIN 0.1ms
+13:05:53 192.168.65.3 via 192.168.65.1 db type=1 local ['192.168.65.2'] 0.2ms
+13:05:53 192.168.65.3 via 192.168.65.1 db type=28 local ['192.168.65.2'] 0.2ms
+13:05:54 192.168.67.3 via 192.168.67.1 db type=1 local ['192.168.67.2'] 0.2ms
+13:05:54 192.168.67.3 via 192.168.67.1 db type=28 local ['192.168.67.2'] 0.0ms
+13:05:54 192.168.65.2 via 192.168.65.1 web type=1 local ['192.168.65.3', '192.168.65.4'] 0.2ms
+13:05:54 192.168.65.2 via 192.168.65.1 web type=1 local ['192.168.65.3', '192.168.65.4'] 0.2ms
+13:05:54 192.168.65.2 via 192.168.65.1 web type=1 local ['192.168.65.3', '192.168.65.4'] 0.1ms
+13:05:54 192.168.65.2 via 192.168.65.1 web type=1 local ['192.168.65.4', '192.168.65.3'] 0.1ms
+13:05:54 192.168.65.2 via 192.168.65.1 web type=1 local ['192.168.65.4', '192.168.65.3'] 0.2ms
+13:05:54 192.168.65.2 via 192.168.65.1 web type=1 local ['192.168.65.3', '192.168.65.4'] 0.2ms
+13:05:54 192.168.65.2 via 192.168.65.1 web type=1 local ['192.168.65.4', '192.168.65.3'] 0.1ms
+13:05:54 192.168.65.2 via 192.168.65.1 web type=1 local ['192.168.65.3', '192.168.65.4'] 0.2ms
+13:05:54 192.168.65.2 via 192.168.65.1 web type=1 local ['192.168.65.4', '192.168.65.3'] 0.1ms
+13:05:54 192.168.65.2 via 192.168.65.1 web type=1 local ['192.168.65.3', '192.168.65.4'] 0.2ms
+13:06:01 192.168.65.3 via 192.168.65.1 db type=1 local NXDOMAIN 0.2ms
+13:06:01 192.168.65.3 via 192.168.65.1 db type=28 local NXDOMAIN 0.0ms
+13:06:04 192.168.65.3 via 192.168.65.1 db type=1 local ['192.168.65.6'] 0.1ms
+13:06:04 192.168.65.3 via 192.168.65.1 db type=28 local ['192.168.65.6'] 0.0ms
+13:06:04 192.168.65.3 via 192.168.65.1 dl-cdn.alpinelinux.org type=1 forward -> default 10.0.7.1:53 82.0ms
+13:06:04 192.168.65.3 via 192.168.65.1 dl-cdn.alpinelinux.org type=28 forward -> default 10.0.7.1:53 52.6ms
+13:06:06 192.168.65.3 via 192.168.65.1 example.com type=1 forward -> default 10.0.7.1:53 9.7ms
+13:06:06 192.168.65.3 via 192.168.65.1 example.com type=1 forward -> default 10.0.7.1:53 8.8ms
+13:06:06 192.168.65.3 via 192.168.65.1 example.com type=1 forward -> default 10.0.7.1:53 9.1ms
+13:06:06 192.168.65.3 via 192.168.65.1 example.com type=1 forward -> default 10.0.7.1:53 9.6ms
+13:06:06 192.168.65.3 via 192.168.65.1 example.com type=1 forward -> default 10.0.7.1:53 11.0ms
+13:06:06 192.168.65.3 via 192.168.65.1 db type=1 local ['192.168.65.6'] 0.2ms
+13:06:06 192.168.65.3 via 192.168.65.1 db type=1 local ['192.168.65.6'] 0.2ms
+13:06:06 192.168.65.3 via 192.168.65.1 db type=1 local ['192.168.65.6'] 0.4ms
+13:06:06 192.168.65.3 via 192.168.65.1 db type=1 local ['192.168.65.6'] 0.3ms
+13:06:06 192.168.65.3 via 192.168.65.1 db type=1 local ['192.168.65.6'] 0.1ms
+13:06:06 192.168.65.3 via 192.168.65.1 gmail.com type=15 forward -> default 10.0.7.1:53 9.6ms
+13:06:06 192.168.65.3 via 192.168.65.1 example.com type=16 forward -> default 10.0.7.1:53 10.6ms
+13:06:06 DROP non-vmnet src=10.0.7.40 dst=10.0.7.40
