@@ -48,8 +48,7 @@ The brief rejected Socktainer with no recorded reason. Its source at v1.6.1 (202
 - **State:** Docker settings live in labels plus three JSON files. There's no store, ledger or boot reconcile, and restart policies don't survive a Socktainer restart.
 - **Silent success:** `network connect`/`disconnect` return 200 and do nothing. `network_mode: none` and `host` quietly become the default network. AD-11 requires a loud failure.
 - **DNS:**
-  - It listens on `0.0.0.0:2054` and answers anyone, so LAN hosts can list container names and use it as an open forwarder.
-  - Names leak across networks.
+  - A security issue in its DNS server was reported privately to the maintainers on 2026-11-14. Details stay out of this repo until they publish a fix.
   - It returns one address per name, so scaled services get no multi-A.
 - **Build:** only legacy `/build` through Apple's builder, without secrets, SSH or `.dockerignore`. No `/grpc`, and `/session` errors. buildx and Bake are unproven.
 - **Not implemented:** pause and commit. Also no app.
