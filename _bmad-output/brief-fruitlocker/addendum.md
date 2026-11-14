@@ -21,7 +21,7 @@ Supporting detail for the PRD and architecture that doesn't fit in the brief.
 - **Build our own engine and app (chosen).** A GUI alone would duplicate Orchard (MIT, 1,754 stars). An app that owns the socket is the open space.
 - **Build on Socktainer and contribute upstream.** Rejected. Socktainer (Apache-2.0, 631 stars, targets Engine API v1.51) stays prior art and a reference.
 - **Fork Socktainer.** Rejected.
-- The rationale for rejecting both Socktainer options wasn't captured. TODO: Josh to add one line.
+- No rationale was recorded for the rejection. Revisited 2026-11-14 with a source comparison (`_bmad-output/initiative-fruitlocker-v1/open-questions-v1.md`, section 3). Join vs build is reopened until the measurement in #22 lands.
 - **Language: Swift.** It shares Containerization and `ContainerAPIClient`, and matches every serious competitor. Recon also weighed Go, for its Moby API types.
 
 ## Minimum Engine API for v1
