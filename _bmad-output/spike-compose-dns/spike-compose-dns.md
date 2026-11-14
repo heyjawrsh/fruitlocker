@@ -66,7 +66,7 @@ Harness `spikes/4-compose-dns/run.sh`. Project `pa` has `pa_default` and `pa_bac
 | Scaled `web` ×10 lookups | 6 × .3, 4 × .4 ✓ |
 | Stop/start `pa-db-1` | NXDOMAIN while stopped, then the new IP (.2 → .6) within the 1s poll ✓ |
 | Forwarding | `apk add` ok; MX and TXT ok ✓ |
-| Split DNS upstreams | Parsed from `scutil --dns` (two domains → 10.8.2.1). **Not exercised by a query** |
+| Split DNS upstreams | Parsed from `scutil --dns` (two domains → <split-dns-server>). **Not exercised by a query** |
 | Query from LAN IP | Dropped (timeout) ✓ |
 | Latency | Local 0.1–0.9 ms in the resolver, 4 ms round trip from the guest. Forwarded 9–20 ms (no cache) |
 
