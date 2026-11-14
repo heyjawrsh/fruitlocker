@@ -1,0 +1,2 @@
+FROM moby/buildkit:v0.35.0
+COPY bin/buildkitd /usr/bin/buildkitd

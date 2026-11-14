@@ -1,0 +1,9 @@
+services:
+  app:
+    build:
+      context: .
+      secrets: [tok]
+    image: fl11/compose-app:1
+secrets:
+  tok:
+    environment: FL11_TOK

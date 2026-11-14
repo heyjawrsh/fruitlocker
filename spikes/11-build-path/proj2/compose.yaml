@@ -1,0 +1,9 @@
+services:
+  a:
+    build: {context: ., args: {GREETING: from-a}, secrets: [tok]}
+    image: fl11/multi-a:1
+  b:
+    build: {context: ., args: {GREETING: from-b}, secrets: [tok]}
+    image: fl11/multi-b:1
+secrets:
+  tok: {environment: FL11_TOK}
