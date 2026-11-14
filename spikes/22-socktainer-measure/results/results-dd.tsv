@@ -1,0 +1,33 @@
+sample	up	probe	down	secs	note
+angular	ok	ok	ok	602	
+apache-php	ok	ok	ok	143	
+django	ok	ok	ok	82	
+fastapi	ok	ok	ok	42	
+flask	ok	ok	ok	25	
+flask-redis	ok	fail(500)	ok	375	web-1    |     raise error
+gitea-postgres	ok	ok	ok	9	
+nextcloud-postgres	ok	ok	ok	126	
+nextcloud-redis-mariadb	ok	ok	ok	78	
+nginx-aspnet-mysql	ok	ok	ok	87	
+nginx-flask-mongo	ok	ok	ok	97	
+nginx-flask-mysql	ok	fail(502)	ok	325	backend-1  | ImportError: cannot import name 'url_quote' from 'werkzeug.urls' (/usr/local/lib/python3.10/site-packages/werkzeug/urls.py)
+nginx-golang	ok	ok	ok	14	
+nginx-golang-mysql	ok	ok	ok	30	
+nginx-golang-postgres	fail(1)	fail(000)	ok	128	 Container fl22-nginx-golang-postgres-db-1 Error dependency db failed to start
+nginx-nodejs-redis	ok	fail(502)	ok	285	nginx-1  | 2026/11/14 13:06:50 [error] 32#32: *91 connect() failed (113: No route to host) while connecting to upstream, client: 192.168.16.1, server: localhost
+nginx-wsgi-flask	fail(1)	fail(000)	ok	149	#30 1.551 ERROR: Exception:
+portainer	ok	ok	ok	9	
+postgresql-pgadmin	ok	ok	ok	53	
+prometheus-grafana	ok	ok	ok	81	
+react-express-mongodb	ok	ok	ok	67	
+react-express-mysql	ok	ok	ok	533	
+react-java-mysql	ok	ok	ok	741	
+react-nginx	ok	ok	ok	125	
+react-rust-postgres	fail(1)	fail(000)	ok	391	#25 14.06 error: failed to parse manifest at `/usr/local/cargo/registry/src/index.crates.io-6f17d22bba15001f/idna_adapter-1.2.2/Cargo.toml`
+sparkjava	ok	ok	ok	89	
+sparkjava-mysql	ok	ok	ok	76	
+spring-postgres	ok	fail(000)	ok	224	#13 55.22 Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/maven-error-diagnostics/2.2.1/maven-error-diagnostics-2.2.1.pom
+traefik-golang	ok	fail(404)	ok	134	frontend-1  | time="2026-11-14T13:50:53Z" level=error msg="Failed to retrieve information of the docker client and server host: Error response from daemon: " pr
+vuejs	fail(1)	fail(000)	ok	166	#12 5.507 warning @vue/cli > @vue/cli-ui > apollo-server-express > apollo-server-core > apollo-server-errors@3.3.1: The `apollo-server-errors` package is part o
+wordpress-mysql	ok	ok	ok	30	
+== dd: 22/31 pass
