@@ -2,7 +2,7 @@
 title: v1 open questions, with recommendations
 date: 2026-11-14
 issue: heyjawrsh/fruitlocker#21
-status: draft (waiting on Josh)
+status: decided 2026-11-14 (Josh)
 ---
 
 # v1 open questions
@@ -62,3 +62,9 @@ The brief rejected Socktainer with no recorded reason. Its source at v1.6.1 (202
 4. Then choose:
    - **Join (hybrid):** build the app on the Engine API with Socktainer as its backend, and contribute DNS scoping, the build path and durable restarts upstream. Pick this if the maintainers welcome a store and failing loudly, *and* the pass rate is about 70% or better.
    - **Build our own:** the spine as written. Pick this if either condition fails. The app is unaffected (AD-13: it talks only to the Engine API), so work on it is never wasted.
+
+## Decisions (Josh, 2026-11-14)
+
+1. **CI runner:** phased as recommended. A dedicated Mac mini runs as the self-hosted runner from epic-compat-matrix on, with trusted triggers only.
+2. **`--privileged`:** allowed as all capabilities inside the container's VM, never host devices. `--device` stays rejected. Socket bind mounts get a clear error until a relay spike proves forwarding fruitlocker's socket inward. This amends AD-11 and R13.
+3. **Socktainer:** measure first. Get a Compose pass rate, report the DNS exposure privately, and hold one upstream design discussion, then choose join (hybrid) or build. Epic work on the engine waits on that call. App and spikes don't.
