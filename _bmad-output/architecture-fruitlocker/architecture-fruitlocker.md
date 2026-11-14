@@ -5,7 +5,7 @@ purpose: build-substrate
 altitude: initiative
 paradigm: 'hexagonal core with reconcile-loop controllers (Swift 6 actors)'
 scope: 'fruitlocker v1: Docker Engine API daemon on Apple container, privileged DNS helper, native macOS app, packaging and CI'
-status: draft
+status: final
 created: '2026-11-13'
 updated: '2026-11-13'
 binds: []
@@ -61,7 +61,7 @@ Dependency rule: adapters depend on `FLCore`, and `FLCore` depends on no adapter
   - `fruitlocker-helper` is a root LaunchDaemon that does AD-9 and nothing else.
   - Both services are registered with `SMAppService` from the same bundle, so all three come from one build.
   - `FLHelperProtocol` opens with a version handshake. On a mismatch the helper refuses, and the daemon re-registers it.
-  - v1 is single-user: the helper serves one daemon connection and rejects a second.
+  - v1 is single-user: the helper serves one daemon connection at a time. A new connection that passes the AD-9 peer check replaces the current one. The helper holds no state, so nothing is lost.
 
 ### AD-2 — Only the daemon talks to Apple
 - **Binds:** all modules
@@ -76,16 +76,22 @@ Dependency rule: adapters depend on `FLCore`, and `FLCore` depends on no adapter
 - **Prevents:** two sources of truth; state with no home (health, restart count)
 - **Rule:**
   - **Spec** (desired, in `FLStore`): config, names, labels, restart policy, healthcheck, network attachments and aliases, port bindings requested, volume metadata, resolved image ID.
-  - **Observed** (in `FLStore`, a separate table from spec). Keyed by `(dockerID, runEpoch)`, where `runEpoch` goes up on every start. Each field has one owner:
-    - `HealthController` owns health.
-    - `RestartController` owns restart count and backoff.
-    - `ContainerService` owns `manuallyStopped`, `generation`, last exit and its times, and allocated host ports.
+  - **Observed** (in `FLStore`, separate from spec) is two tables. Every column has exactly one writer.
+    - `container_observed(dockerID)`, per container:
+      - `ContainerService` writes `generation`, `manuallyStopped` and `runEpoch`. `runEpoch` goes up on every start.
+      - `RestartController` writes `restartCount` and backoff.
+    - `run_observed(dockerID, runEpoch)`, per run:
+      - `HealthController` writes health, which resets with each new run.
+      - The record-exit function (AD-6) writes start and exit times and the exit code.
   - **Runtime** comes from Apple, is read live, and is never persisted as truth.
-  - `inspect` is spec + observed + runtime, assembled by one core function.
+  - `inspect` is spec + observed + runtime, assembled by one core function that reads spec and observed in a single store read transaction.
   - **Materialization:**
     - Write the spec `pending`, then create the Apple object, then mark it `materialized` with its `specHash`.
     - The Apple container is created at first start and reused after that.
+    - `specHash` covers only the canonical Apple `ContainerConfiguration` the spec produces. Networks are ordered by `gw_priority` descending, then by name.
   - **Spec edits Apple can't apply in place** (networks, mounts, env, ports) set `needsRecreate`. The next start recreates the Apple container, losing its writable layer but not its volumes, and returns a Docker `Warnings` entry plus a `Type=daemon` event [ADOPTED].
+    - Recreate write order: record `recreating{oldAppleID, newAppleID}` first, then create the new object, then delete the old one, then mark it `materialized`.
+    - The new Apple ID is minted per AD-4.
   - Apple objects carry only the label `fl.docker.id`.
 
 ### AD-4 — Identity and visibility [ADOPTED in part]
@@ -114,12 +120,20 @@ Dependency rule: adapters depend on `FLCore`, and `FLCore` depends on no adapter
 - **Prevents:** duplicate, missing, phantom or reordered events
 - **Rule:**
   - **One bus:** `EventBus` in `FLCore`, with a bounded history buffer it owns for `since=`.
-  - **Emitter table:** each `(Type, Action)` has exactly one emitter, listed in Conventions.
+  - **Emitter table:** each `(Type, Action)` has exactly one emitter, listed in Conventions. The table is total: an action that isn't listed is never emitted.
   - **Publish timing:** an event is published only after the runtime call succeeds *and* the store commits. Per object, events are delivered in publication order.
   - **Intent ledger:**
-    - Before a runtime call, each core mutation records `{id, from, to, generation}`.
-    - The runtime poller, which is a core service and the only code that reads Apple on a timer, suppresses diffs that match an open entry. It publishes the rest, such as unexpected exits.
-    - For exits of processes the daemon started, `ClientProcess.wait` is the fast path.
+    - Before a runtime call, each core mutation records `{dockerID, runEpoch, op, from, to, generation}`.
+    - `op` covers run-state changes as well as `materialize` and `dematerialize`.
+    - An entry matches only diffs on the same `runEpoch`.
+    - No entry survives boot (AD-16).
+  - **The poller:**
+    - It is a core service, and the only code that reads Apple on a timer.
+    - It diffs runtime against *observed* state, not against its last snapshot, and suppresses matching ledger entries.
+    - It never awaits an object lock. It hands each observation to a per-object record task.
+  - **Exactly one `die` per `(dockerID, runEpoch)`:**
+    - The poller and `ClientProcess.wait` (the fast path for init processes the daemon started) both feed one record-exit function.
+    - Whichever path records the exit first emits the event. A later path is a no-op.
   - **Host network:** bridge up/down and mDNSResponder's `udp4 *:53` state come from the `HostNetObserver` port and are published on the bus.
 
 ### AD-7 — One mutation path, per-object serialization
@@ -129,16 +143,26 @@ Dependency rule: adapters depend on `FLCore`, and `FLCore` depends on no adapter
   - HTTP handlers call core services only. Core services, the poller included, are the only callers of the runtime, registry and store ports.
   - **Per-object lock:** each object ID has an async FIFO mutex, held across every `await` of a mutation. Different objects mutate concurrently, and reads take no object lock.
   - **References:** every reference between objects (container→network, container→volume, container→image) is a foreign-key row in `FLStore`. Existence, in-use and implicit-create checks, together with the referencing write, happen in one transaction.
-  - **Lock order:** network → volume → image → container, ascending ID within a kind.
+  - **Who owns attachments:** `ContainerService` owns container→network rows. `NetworkService` calls it to connect or disconnect.
+  - **In use:** a network or volume counts as in use when any spec references it *or* any materialized Apple container is still attached to it.
+    - `network rm` first dematerializes stopped containers whose only remaining link is a stale attachment.
+    - That covers Compose's stop → disconnect → rm → create → connect → start sequence.
+  - **Images:** an image that any container spec references is never deleted from Apple's store. `rmi -f` only untags it.
+  - **Lock order:** network → volume → image → container (ascending ID within a kind), then per-network lifecycle mutexes (AD-10) as leaf locks.
+    - Lifecycle mutexes are taken in ascending network ID.
+    - No object lock is taken while one is held.
 
 ### AD-8 — Behavior Apple lacks is a controller
 - **Binds:** restart, health, DNS view, network lifecycle
 - **Prevents:** emulations scattered through handlers; controllers fighting; stale actions
 - **Rule:**
   - Each controller lives in `FLCore`, subscribes to the `EventBus`, reads spec and observed state, and acts only through core services.
-  - **Generations:** an action carries the `generation` it observed. A stale action is rejected, and user mutations bump the `generation`.
+  - **Generations:** an action carries the `(generation, runEpoch)` it observed and is rejected unless both still match. User mutations bump the `generation`.
+  - **Start cause:** the `start` event carries `fl.cause=user|policy|boot`.
   - **Health:** health never changes run state, and it never triggers a restart.
   - **Pre-mutation hook:** the only one allowed is `NetworkLifecycle` (AD-10).
+  - **Controller-to-controller:** the one allowed call is `NetworkLifecycle` → `DNSViewController.withdraw(container)`.
+  - **Boot:** a controller stays inert until its boot step (AD-16).
   - **Upstream:** a controller is deleted when Apple ships the behavior.
 
 ### AD-9 — DNS: the helper binds, the daemon owns [ADOPTED]
@@ -150,6 +174,7 @@ Dependency rule: adapters depend on `FLCore`, and `FLCore` depends on no adapter
   - **Handover:** after passing the fd, the helper closes its copy at once. It keeps no fds, no bind state and no guard of its own.
   - **Ownership:** the daemon is the sole owner. Release means the daemon closes its fd, and if the daemon dies the kernel closes it.
   - **Socket port:** `FLDNS` runs on a `DatagramSocket` port, so a packet-relay helper can replace the fd handover without touching the core.
+  - **One socket per gateway:** `FLDNS` holds at most one. A second handover for a gateway it already holds is closed at once and logged.
   - **Answers:** `FLDNS` answers from the current `DNSView` (AD-21), following the #4 resolver rules.
   - **No helper:** if the user refuses the helper, Compose names are unavailable, and a `/fruitlocker/v1` warning and a `Type=daemon` event say so. Apple alias DNS is not in v1.
 
@@ -157,12 +182,25 @@ Dependency rule: adapters depend on `FLCore`, and `FLCore` depends on no adapter
 - **Binds:** networks, DNS, every start and stop path
 - **Prevents:** the #402/#4 wedge; late release; concurrent last-stops both skipping release
 - **Rule:**
-  - **Pre-mutation hooks:** `NetworkController` implements the `NetworkLifecycle` port. Every core path that starts or stops a VM, for any reason, awaits `willStart`/`willStop` before calling the runtime.
-  - **Counting:** it keeps each network's running count itself, from runtime attachments.
-  - **Bind:** only when the bridge is up and mDNSResponder holds `udp4 *:53`, per `HostNetObserver`.
-  - **Release:** `willStop` on the last container returns only after the release has completed.
-  - **Backstop** (continuous): release immediately on an unexpected `die` of the last container, on bridge-down, or when mDNSResponder drops `udp4 *:53`. The window for crash exits is accepted.
-  - It creates the fruitlocker `bridge` network on first boot. Apple's `default` stays hidden.
+  - **Hooks:** `NetworkController` implements the `NetworkLifecycle` port.
+    - Every core path that starts or stops a VM, for any reason, awaits `willStart`/`willStop` before calling the runtime.
+    - It then calls `didStart`/`didStop(ok | failed)` after the runtime call. That call is mandatory, and a failure re-runs the guard.
+  - **One lock:** all of a network's lifecycle state sits under its lifecycle mutex, a leaf lock (AD-7).
+    - Every bind or release decision, whether it comes from a hook, a `HostNetObserver` event or the backstop, runs under that mutex.
+    - It is recomputed from current state, never from an event payload.
+  - **Count:** joined containers (AD-4) that are running or reserved to start, minus those reserved to stop. Membership comes from the AD-21 projection, extended to every fruitlocker network.
+  - **Bind** only while all of these hold:
+    - the count is above 0
+    - no stop is reserved
+    - the bridge is up
+    - mDNSResponder holds `udp4 *:53`
+  - **Release:** `willStop` on the last container withdraws its DNS entries, releases, and only then returns.
+  - **Backstop** (continuous): release immediately when any of these happens. The window for crash exits is accepted.
+    - an unexpected `die` of the last container
+    - bridge-down
+    - mDNSResponder drops `udp4 *:53`
+    - a bridge has no joined container left among its attachments
+  - **`bridge`:** fruitlocker's `bridge` network gateway is never bound. Guests on it use mDNSResponder, as on Docker's default bridge. Apple's `default` stays hidden.
   - It owns detecting and mitigating #8.
 
 ### AD-11 — Unsupported fails loudly; every field is classified
@@ -218,12 +256,19 @@ Dependency rule: adapters depend on `FLCore`, and `FLCore` depends on no adapter
     2. Bootstrap Apple's services if they're down (AD-2).
     3. Version gate (AD-12).
     4. Migrate the store (AD-18).
-    5. Take a runtime snapshot as a silent baseline, then publish one synthetic `resync` to every controller.
-    6. Sweep orphans: labeled Apple objects with a `pending` spec are adopted, and those with no spec are deleted.
-    7. `NetworkController` rebinds per the guard.
-    8. `RestartController` applies Docker's daemon-start rules from `manuallyStopped`.
-    9. Open the object endpoints.
+    5. Take a runtime snapshot. Resolve every open ledger entry against it, completing or rolling back each one.
+    6. Sweep:
+       - adopt labeled objects whose spec is `pending`
+       - finish any `recreating` forward
+       - mark a materialized spec whose Apple object is missing as `needsRecreate`
+       - when two labeled objects share a Docker ID, keep the one the spec names
+       - delete labeled objects that have no spec
+    7. Ensure the `bridge` network exists.
+    8. Publish one synthetic `resync`. `DNSViewController` and `NetworkController` activate and rebind per the guard.
+    9. `RestartController` activates and applies Docker's daemon-start rules from `manuallyStopped`. This is the only daemon-start restart path.
+    10. Health and the remaining controllers activate. Open the object endpoints.
   - Controllers derive state from spec + observed + snapshot, never from event history.
+  - An apiserver reconnect re-runs steps 3 and 5–10, and object endpoints return 503 until it finishes.
 
 ### AD-17 — Local security boundary
 - **Binds:** socket, helper, app
@@ -247,8 +292,12 @@ Dependency rule: adapters depend on `FLCore`, and `FLCore` depends on no adapter
 - **Prevents:** two port mechanisms; ephemeral ports allocated in two places
 - **Rule:**
   - Ports are published through Apple's runtime when the container materializes.
-  - Requested bindings are spec. Ephemeral host ports (`0`, `-P`) are allocated by `ContainerService` at start into observed state.
-  - Published ports land on the container's first network (Apple's behavior), and `inspect` reports exactly that.
+  - Requested bindings are spec.
+  - **Ephemeral host ports** (`0`, `-P`):
+    - They are allocated when an Apple container is created, at first start or recreate. A plain start never allocates.
+    - They go into a `host_ports` table, unique on `(hostIP, hostPort, proto)`, in the same transaction as the materialization write.
+    - They are kept across stops and freed only on recreate or destroy.
+  - Published ports land on the first network in AD-3's canonical order (Apple's behavior), and `inspect` reports exactly that.
   - A port conflict returns Docker's error.
 
 ### AD-20 — One log source
@@ -265,9 +314,12 @@ Dependency rule: adapters depend on `FLCore`, and `FLCore` depends on no adapter
 - **Rule:**
   - `DNSViewController` in `FLCore` is the only code that computes names. It projects spec + observed + runtime IPs for each user-defined network into an immutable, versioned `DNSView`, and pushes it to `FLDNS`. `FLDNS` derives nothing.
   - A querier's view is the union of the user-defined networks it's attached to.
-  - The same function fills `NetworkSettings.Networks[*].DNSNames`, and `NetworkController` reads membership from the same projection.
-  - The `bridge` network gets forwarding only.
-  - A container's entries, its source-IP entry included, are removed on `willStop` or `die`.
+  - The same function fills `NetworkSettings.Networks[*].DNSNames`, and `NetworkController` counts from the same projection (AD-10).
+  - **Source-IP entries:**
+    - They are keyed by `(IP, network)`.
+    - Each one is installed inside the container's start operation, before the `start` event, and replaces any earlier entry for that IP.
+    - It is withdrawn by the `willStop` hook or on `die`.
+  - Containers on `bridge` aren't served at all; they use mDNSResponder (AD-10).
 
 ## Consistency Conventions
 
@@ -278,7 +330,7 @@ Dependency rule: adapters depend on `FLCore`, and `FLCore` depends on no adapter
 | Bundle and log ids | `sh.jawr.fruitlocker`, `.daemon`, `.helper` (dev builds add `.dev`) `[ASSUMPTION]`. Logging is OSLog only (subsystem = bundle id, category = module), with a diagnostics export at `/fruitlocker/v1/diagnostics` |
 | Labels on Apple objects | `fl.docker.id` only. Docker labels live in the spec |
 | Errors | Docker shape `{"message": "..."}`. Unsupported → 400 `fruitlocker: <option> is not supported: <reason>`. Unimplemented → 501. Gate failed → 503. Apple errors map to the nearest Docker status and keep Apple's message. Degradations go in Docker's `Warnings` array |
-| Event emitters | `ContainerService`: container `create`, `start`, `kill`, `die` (when expected), `stop`, `destroy`, `rename`, `update`, plus network `connect`/`disconnect` and volume `mount`/`unmount` inside those operations. Runtime poller: unexpected `die`, `oom`. `NetworkService`: network `create`/`destroy`. `VolumeService`: volume `create`/`destroy`. `ImageService`: image `pull`, `push`, `tag`, `untag`, `delete`, `load`, `save`. `HealthController`: `health_status`. Owning controller: `Type=daemon` `fl.*` |
+| Event emitters (total, per AD-6) | `ContainerService`: container `create`, `start`, `restart`, `kill`, `stop`, `destroy`, `rename`, `update`, `pause`, `unpause`, `attach`, `resize`, `exec_create`, `exec_start`, `exec_die`, `prune`, plus network `connect`/`disconnect` and volume `mount`/`unmount` inside its operations, and `Type=daemon` `fl.recreate`. Record-exit function: `die`, `oom`. `NetworkService`: network `create`, `destroy`, `prune`. `VolumeService`: volume `create`, `destroy`, `prune`. `ImageService`: image `pull`, `push`, `tag`, `untag`, `delete`, `load`, `save`, `prune`. `HealthController`: `health_status`. `NetworkController`: `Type=daemon` `fl.dns.bound`, `fl.dns.released`, `fl.dns.unavailable`. Engine: `Type=daemon` `fl.gate`, `fl.compat.warning` |
 | Time and ids | RFC 3339 UTC in JSON, Unix seconds wherever Docker uses them; IDs per AD-4 |
 | Concurrency | Swift 6 language mode, strict concurrency; per-object locks per AD-7 |
 | Network egress | None of fruitlocker's own except registries (AD-14), DNS upstreams (AD-9) and Sparkle update checks. No telemetry, accounts or hosted services |
