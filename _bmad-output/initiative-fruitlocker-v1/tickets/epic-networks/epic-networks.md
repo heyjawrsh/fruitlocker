@@ -34,13 +34,14 @@ risk: medium
 
 - Owns: `NetworkService`, network endpoints, boot step 7.
 - Not here: `NetworkController`, the lifecycle hooks, the `:53` guard and DNS (epic-compose-dns).
+- Handoff: epic-compose-dns, epic-volumes, epic-logs-exec, epic-restart-health and epic-app rely on the network endpoints and the project network.
 
 ## References
 
 - parent: _bmad-output/initiative-fruitlocker-v1/initiative-fruitlocker-v1.md, section Requirements (R2, R9, R10)
-- architecture: _bmad-output/architecture-fruitlocker/architecture-fruitlocker.md, AD-3 (network attachments, needsRecreate), AD-4 (network IDs), AD-7 (attachment ownership, in-use, lock order), AD-11 (no connect on running), AD-16 (step 7), AD-19 (ports on first network)
+- architecture: _bmad-output/architecture-fruitlocker/architecture-fruitlocker.md, AD-3 (network attachments, needsRecreate), AD-4 (network IDs), AD-6 (network emitters), AD-7 (attachment ownership, in-use, lock order), AD-11 (no connect on running), AD-16 (step 7), AD-19 (ports on first network)
 
 ## Notes
 
-- Waits on epic-containers because: `ContainerService` owns container to network rows and materialization.
+- Waits on epic-containers because: it needs `ContainerService`, materialization and the attachment extension point; this epic adds the container to network rows there.
 - Bug #8 (bridge collision) may show up first here; detection and mitigation belong to `NetworkController` in epic-compose-dns (AD-10).

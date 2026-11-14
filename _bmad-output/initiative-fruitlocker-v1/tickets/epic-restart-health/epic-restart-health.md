@@ -44,3 +44,4 @@ A Compose project with `restart: unless-stopped` and `depends_on: condition: ser
 
 - Waits on epic-containers because: it needs observed state, `runEpoch`, generations and the record-exit function.
 - Waits on epic-logs-exec because: a policy restart goes through the start path that wires the AD-20 log source, so one container keeps one log across restarts.
+- Waits on epic-networks because: the `service_healthy` Compose sample needs its project network.

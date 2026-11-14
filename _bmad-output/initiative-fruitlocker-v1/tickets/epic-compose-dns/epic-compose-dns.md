@@ -33,6 +33,7 @@ In a Compose project, `web` reaches `db` by service name and alias, and `:53` is
 
 ## Boundaries
 
+- Handoff: replaces epic-containers' no-op `NetworkLifecycle` with `NetworkController`, and adds source-IP entries through its start-operation hook and `DNSNames` through its `inspect` function.
 - Owns: `fruitlocker-helper`, `FLHelperProtocol`, `FLDNS`, `HostNetObserver`, `NetworkController`, `DNSViewController`, boot step 8, #8 detection and mitigation.
 - Owns the DNS items deferred from #4 and #5: TCP DNS, forwarding cache and retries, the firewall prompt, coexistence with other vmnet users, the first start of a network.
 - Not here: Apple alias DNS (out of v1, AD-9).

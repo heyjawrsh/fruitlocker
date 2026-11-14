@@ -33,13 +33,14 @@ A Compose project's Postgres keeps its data across `down` and `up`, and `docker 
 
 ## Boundaries
 
-- Owns: `VolumeService`, volume endpoints.
+- Owns: `VolumeService`, volume endpoints, container to volume reference rows in `ContainerService` (plugged into epic-containers' extension points).
+- Handoff: epic-app relies on the volume endpoints for its views.
 - Not here: bind mounts of host paths beyond what container create already supports (epic-containers).
 
 ## References
 
 - parent: _bmad-output/initiative-fruitlocker-v1/initiative-fruitlocker-v1.md, section Requirements (R2, R9, R10)
-- architecture: _bmad-output/architecture-fruitlocker/architecture-fruitlocker.md, AD-4 (volume names and Apple IDs), AD-5, AD-7 (volume references, in-use, lock order), AD-11
+- architecture: _bmad-output/architecture-fruitlocker/architecture-fruitlocker.md, AD-3 (mounts set needsRecreate and feed specHash), AD-4 (volume names and Apple IDs), AD-5, AD-6 (volume emitters), AD-7 (volume references, in-use, lock order), AD-11
 
 ## Notes
 

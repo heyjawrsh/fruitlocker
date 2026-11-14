@@ -24,7 +24,7 @@ slug = "epic-containers"
 title = "Containers run, stop and report"
 description = "docker run, ps, inspect, stop, kill, rm, wait, rename, pause, stats, cp and published ports work; the poller feeds /events with exactly one die per run; boot reconcile adopts and sweeps."
 covers = ["R2", "R5", "R10", "R13"]
-ads = ["AD-3", "AD-4", "AD-6", "AD-7", "AD-11", "AD-16", "AD-19"]
+ads = ["AD-3", "AD-4", "AD-6", "AD-7", "AD-10", "AD-11", "AD-16", "AD-19"]
 after = [{ epic = 2, needs = "pulled images and image references" }]
 
 [[epic]]
@@ -33,8 +33,8 @@ slug = "epic-networks"
 title = "User networks for Compose"
 description = "docker network create, ls, inspect, rm, prune, and connect or disconnect on stopped containers work; the bridge network exists at boot; Compose creates its project network."
 covers = ["R2", "R9", "R10"]
-ads = ["AD-3", "AD-4", "AD-7", "AD-11", "AD-16", "AD-19"]
-after = [{ epic = 3, needs = "ContainerService, which owns container to network rows" }]
+ads = ["AD-3", "AD-4", "AD-6", "AD-7", "AD-11", "AD-16", "AD-19"]
+after = [{ epic = 3, needs = "ContainerService, materialization and its attachment extension point; this epic adds container to network rows" }]
 
 [[epic]]
 id = 5
@@ -52,7 +52,7 @@ slug = "epic-volumes"
 title = "Named volumes persist across containers"
 description = "docker volume create, ls, inspect, rm, prune and -v mounts work on Apple's volume store, with in-use checks and a loud error if shared mounts are unsupported."
 covers = ["R2", "R9", "R10"]
-ads = ["AD-4", "AD-5", "AD-7", "AD-11"]
+ads = ["AD-3", "AD-4", "AD-5", "AD-6", "AD-7", "AD-11"]
 spikes = ["#13"]
 after = [{ epic = 3, needs = "container create and materialization" }, { epic = 4, needs = "the canonical ContainerConfiguration with attachments, so mounts join one specHash and the network-then-volume lock order" }]
 
@@ -64,7 +64,7 @@ description = "docker logs, attach and exec -it, and Compose logs and exec, read
 covers = ["R2", "R6", "R10"]
 ads = ["AD-6", "AD-20"]
 spikes = ["#12"]
-after = [{ epic = 3, needs = "running containers and ContainerService" }]
+after = [{ epic = 3, needs = "running containers and ContainerService" }, { epic = 4, needs = "Compose project network for the pinned logs and exec sample" }]
 
 [[epic]]
 id = 8
@@ -73,7 +73,7 @@ title = "Restart policies and healthchecks"
 description = "RestartController and HealthController give Docker's restart policies and healthchecks, including the daemon-start restart path, and Compose depends_on service_healthy works."
 covers = ["R11", "R10"]
 ads = ["AD-3", "AD-6", "AD-8", "AD-16"]
-after = [{ epic = 3, needs = "observed state, runEpoch and the record-exit function" }, { epic = 7, needs = "the log source wired into start, so a policy restart keeps one log" }]
+after = [{ epic = 3, needs = "observed state, runEpoch and the record-exit function" }, { epic = 7, needs = "the log source wired into start, so a policy restart keeps one log" }, { epic = 4, needs = "Compose project network for the service_healthy sample" }]
 
 [[epic]]
 id = 9
@@ -83,7 +83,7 @@ description = "docker build and Compose build produce an image in Apple's store 
 covers = ["R2", "R8"]
 ads = ["AD-5", "AD-11", "AD-14"]
 spikes = ["#11"]
-after = [{ epic = 2, needs = "Apple image store adapter and registry auth" }]
+after = [{ epic = 2, needs = "Apple image store adapter and registry auth" }, { epic = 3, needs = "docker run to prove the built image runs" }]
 
 [[epic]]
 id = 10

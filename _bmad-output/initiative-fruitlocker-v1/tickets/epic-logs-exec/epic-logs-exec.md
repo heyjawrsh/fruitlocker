@@ -26,6 +26,7 @@ A developer runs `docker compose logs -f` and `docker exec -it <svc> sh` and the
 - `docker logs`, `logs -f`, `--since`, `--timestamps` work and match what the app will show (R6, AD-20).
 - `docker exec -it <c> sh` gives an interactive shell with working resize; exec with a body and stdin half-close works (spine Deferred, hijack).
 - `docker attach` and `docker run -it` work (R6).
+- `/events` shows `attach`, `resize`, `exec_create`, `exec_start`, `exec_die` from `ContainerService` (R10, attach and exec part).
 - After a daemon restart, a running container keeps writing and `docker logs` shows output from before and after (AD-20).
 - Compose `logs` and `exec` pass on a pinned sample on the local runner (R1 inputs).
 - Delivered: the change is in a signed build Josh runs on his Mac against Apple `container` 1.7.1, with core tests green in CI.
@@ -34,6 +35,7 @@ A developer runs `docker compose logs -f` and `docker exec -it <svc> sh` and the
 
 - Owns: the log source and its core service, the hijack child channel, attach, exec, resize endpoints, `exec_create`/`exec_start`/`exec_die` events.
 - Not here: the app's log view and shell (epic-app reuses this service over the socket).
+- Handoff: epic-restart-health relies on the log source being wired into the start path; epic-app relies on the log service and exec.
 
 ## References
 
@@ -44,3 +46,4 @@ A developer runs `docker compose logs -f` and `docker exec -it <svc> sh` and the
 
 - Waits on #12 (stdio and log ownership spike) because: it decides AD-20's source before any logs or attach work begins.
 - Waits on epic-containers because: logs and exec need running containers and `ContainerService`.
+- Waits on epic-networks because: the pinned Compose logs and exec sample needs its project network.

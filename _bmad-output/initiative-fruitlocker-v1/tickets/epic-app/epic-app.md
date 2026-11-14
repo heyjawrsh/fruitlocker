@@ -15,7 +15,7 @@ risk: medium
 
 ## Description
 
-The SwiftUI menu-bar app is UI only. It controls the daemon process only through `SMAppService` and reads and writes engine state only over the socket: the Engine API for Docker objects and `/fruitlocker/v1/*` for engine-only concerns. It shows containers, images, volumes and networks grouped by Compose project, streams logs and opens a shell through the same core service the CLI uses, surfaces warnings, and on first run creates and switches to a `fruitlocker` Docker context, recording the previous one for undo. It detects Apple `container` and guides its install.
+The SwiftUI menu-bar app is UI only. It controls the daemon process only through `SMAppService` and reads and writes engine state only over the socket: the Engine API for Docker objects and `/fruitlocker/v1/*` for engine-only concerns. It shows containers, images, volumes and networks grouped by Compose project, streams logs and opens a shell through the same core service the CLI uses, surfaces warnings, and on first run creates and switches to a `fruitlocker` Docker context, recording the previous one for undo. It learns whether Apple `container` is installed from the daemon's `/fruitlocker/v1` status (the app never contacts Apple, AD-2) and guides its install.
 
 ## Outcome
 
