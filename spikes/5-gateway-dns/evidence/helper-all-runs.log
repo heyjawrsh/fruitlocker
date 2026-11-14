@@ -1,0 +1,76 @@
+21:23:47 ready pid=40650 upstreams=[('<split-domain-1>', '<split-dns-server>'), ('<split-domain-2>', '<split-dns-server>'), (None, '10.79.79.254')]
+21:24:29 192.168.64.1: waiting: address not on any interface
+21:28:54 192.168.65.1: BOUND SO_REUSEADDR (plain bind got EADDRINUSE)
+21:29:00 192.168.65.2 -> 192.168.65.1 fl5-probe type=1 probe
+21:29:01 192.168.65.1: CLOSED (not requested)
+21:29:14 192.168.64.1: BOUND SO_REUSEADDR (plain bind got EADDRINUSE)
+21:29:18 192.168.64.3 -> 192.168.64.1 fl5-probe type=1 probe
+21:29:18 192.168.64.3 -> 192.168.64.1 example.com type=1 forward 10.79.79.254
+21:29:27 192.168.64.1: CLOSED (interface gone)
+21:29:27 192.168.64.1: waiting: address not on any interface
+21:29:39 192.168.64.1: BOUND SO_REUSEADDR (plain bind got EADDRINUSE)
+21:29:41 192.168.64.4 -> 192.168.64.1 fl5-probe type=1 probe
+21:29:42 192.168.64.4 -> 192.168.64.1 example.com type=1 forward 10.79.79.254
+21:29:48 192.168.64.1: CLOSED (not requested)
+21:33:02 192.168.64.1: BOUND SO_REUSEADDR (plain bind got EADDRINUSE)
+21:33:04 192.168.64.2 -> 192.168.64.1 fl5-probe type=1 probe
+21:33:06 192.168.64.2 -> 192.168.64.1 example.com type=1 forward FAILED
+21:33:06 192.168.64.2 -> 192.168.64.1 example.com type=1 forward 10.79.79.254
+21:33:08 192.168.64.1: CLOSED (not requested)
+21:33:09 192.168.64.1: BOUND SO_REUSEADDR (plain bind got EADDRINUSE)
+21:33:10 192.168.64.2 -> 192.168.64.1 fl5-probe type=1 probe
+21:33:10 192.168.64.2 -> 192.168.64.1 example.com type=1 forward 10.79.79.254
+21:33:12 192.168.64.1: CLOSED (not requested)
+21:33:13 192.168.64.1: BOUND SO_REUSEADDR (plain bind got EADDRINUSE)
+21:33:14 192.168.64.2 -> 192.168.64.1 fl5-probe type=1 probe
+21:33:14 192.168.64.2 -> 192.168.64.1 example.com type=1 forward 10.79.79.254
+21:33:15 192.168.64.1: CLOSED (not requested)
+21:33:16 192.168.64.1: BOUND SO_REUSEADDR (plain bind got EADDRINUSE)
+21:33:18 192.168.64.2 -> 192.168.64.1 fl5-probe type=1 probe
+21:33:18 192.168.64.2 -> 192.168.64.1 example.com type=1 forward 10.79.79.254
+21:33:19 192.168.64.1: CLOSED (not requested)
+21:33:20 192.168.64.1: BOUND SO_REUSEADDR (plain bind got EADDRINUSE)
+21:33:21 192.168.64.2 -> 192.168.64.1 fl5-probe type=1 probe
+21:33:22 192.168.64.2 -> 192.168.64.1 example.com type=1 forward 10.79.79.254
+21:33:23 192.168.64.1: CLOSED (not requested)
+21:33:23 192.168.64.1: BOUND SO_REUSEADDR (plain bind got EADDRINUSE)
+21:33:25 192.168.64.2 -> 192.168.64.1 fl5-probe type=1 probe
+21:33:25 192.168.64.2 -> 192.168.64.1 example.com type=1 forward 10.79.79.254
+21:33:27 192.168.64.1: CLOSED (not requested)
+21:33:27 192.168.64.1: BOUND SO_REUSEADDR (plain bind got EADDRINUSE)
+21:33:29 192.168.64.2 -> 192.168.64.1 fl5-probe type=1 probe
+21:33:29 192.168.64.2 -> 192.168.64.1 example.com type=1 forward 10.79.79.254
+21:33:30 192.168.64.1: CLOSED (not requested)
+21:33:31 192.168.64.1: BOUND SO_REUSEADDR (plain bind got EADDRINUSE)
+21:33:32 192.168.64.2 -> 192.168.64.1 fl5-probe type=1 probe
+21:33:32 192.168.64.2 -> 192.168.64.1 example.com type=1 forward 10.79.79.254
+21:33:34 192.168.64.1: CLOSED (not requested)
+21:33:34 192.168.64.1: BOUND SO_REUSEADDR (plain bind got EADDRINUSE)
+21:33:37 192.168.64.2 -> 192.168.64.1 fl5-probe type=1 probe
+21:33:37 192.168.64.2 -> 192.168.64.1 example.com type=1 forward 10.79.79.254
+21:33:38 192.168.64.1: CLOSED (not requested)
+21:33:39 192.168.64.1: BOUND SO_REUSEADDR (plain bind got EADDRINUSE)
+21:33:40 192.168.64.2 -> 192.168.64.1 fl5-probe type=1 probe
+21:33:41 192.168.64.2 -> 192.168.64.1 example.com type=1 forward 10.79.79.254
+21:33:42 192.168.64.1: CLOSED (not requested)
+21:33:42 192.168.64.1: BOUND SO_REUSEADDR (plain bind got EADDRINUSE)
+21:33:44 192.168.64.2 -> 192.168.64.1 fl5-probe type=1 probe
+21:33:44 192.168.64.2 -> 192.168.64.1 example.com type=1 forward 10.79.79.254
+21:33:45 192.168.64.1: CLOSED (not requested)
+21:33:46 192.168.64.1: BOUND SO_REUSEADDR (plain bind got EADDRINUSE)
+21:33:46 192.168.65.1: BOUND SO_REUSEADDR (plain bind got EADDRINUSE)
+21:33:47 192.168.64.2 -> 192.168.64.1 fl5-probe type=1 probe
+21:33:47 192.168.65.2 -> 192.168.65.1 fl5-probe type=1 probe
+21:33:48 192.168.65.1: CLOSED (not requested)
+21:33:55 192.168.64.1: CLOSED (interface gone)
+21:33:55 192.168.64.1: waiting: address not on any interface
+21:33:59 192.168.64.1: BOUND SO_REUSEADDR (plain bind got EADDRINUSE)
+21:34:01 192.168.64.3 -> 192.168.64.1 fl5-probe type=1 probe
+21:34:01 192.168.64.3 -> 192.168.64.1 example.com type=1 forward 10.79.79.254
+21:34:08 192.168.64.1: CLOSED (interface gone)
+21:34:08 192.168.64.1: waiting: address not on any interface
+21:34:13 192.168.64.1: BOUND SO_REUSEADDR (plain bind got EADDRINUSE)
+21:34:15 192.168.64.4 -> 192.168.64.1 fl5-probe type=1 probe
+21:34:16 192.168.64.4 -> 192.168.64.1 example.com type=1 forward 10.79.79.254
+21:34:17 192.168.64.1: CLOSED (not requested)
+21:35:02 exit

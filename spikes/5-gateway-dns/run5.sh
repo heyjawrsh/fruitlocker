@@ -26,15 +26,17 @@ umask 022; : > $CTL
 HL=$(wc -l < $HLOG)
 cleanup
 
-echo "## 1. setup: a1 on fl5_a, b1 on fl5_b, d1 on default; baseline via mDNSResponder"
+echo "## 1. setup: d1 on default first (holds its bridge, avoids apple/container#2051), then a1 on fl5_a, b1 on fl5_b"
+$C run -d --name fl5-d1 --network default $IMG sleep 1800 >/dev/null
 for n in $NETS; do $C network create $n >/dev/null; done
 $C run -d --name fl5-a1 --network fl5_a   $IMG sleep 1800 >/dev/null
 $C run -d --name fl5-b1 --network fl5_b   $IMG sleep 1800 >/dev/null
-$C run -d --name fl5-d1 --network default $IMG sleep 1800 >/dev/null
 GA=$(gw fl5-a1) GB=$(gw fl5-b1) GD=$(gw fl5-d1)
 echo "gateways: a=$GA b=$GB default=$GD"
-for c in $CTRS; do L $c example.com; L $c fl5-probe; done
+echo "-- host bridges: $(ifconfig | awk '/^bridge/{i=$1} /inet 192.168/ && i{print i, $2}' | tr '\n' ' ')"
+base=$(for c in $CTRS; do L $c example.com; L $c fl5-probe; done); echo "$base"
 p53
+[[ $base == *ERROR* ]] && { echo "baseline broken before the helper did anything; aborting"; cleanup; exit 2; }
 
 echo "## 2. helper binds fl5_a's gateway only"
 ctl "up $GA"
@@ -52,7 +54,7 @@ ok=0
 for i in {1..10}; do
   ctl "up $GA" >/dev/null; r1=$(L fl5-a1 fl5-probe); r2=$(L fl5-a1 example.com)
   ctl "" >/dev/null;       r3=$(L fl5-a1 example.com); r4=$(L fl5-a1 fl5-probe)
-  [[ $r1 == *10.55.55.55 && $r2 != *ERROR* && $r3 != *ERROR* && $r4 == *NXDOMAIN ]] && ((ok++)) || echo "  cycle $i FAIL: $r1 | $r2 | $r3 | $r4"
+  if [[ $r1 == *10.55.55.55 && $r2 != *ERROR* && $r3 != *ERROR* && $r4 == *NXDOMAIN ]]; then ok=$((ok+1)); else echo "  cycle $i FAIL: $r1 | $r2 | $r3 | $r4"; fi
 done
 echo "  cycles passed: $ok/10"
 p53
