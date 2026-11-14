@@ -1,0 +1,114 @@
+# fruitlocker v1 epics, in build order. `ads` and `spikes` are informational keys tickets.py ignores.
+# spikes: GitHub issues in heyjawrsh/fruitlocker that gate the epic or part of it.
+
+[[epic]]
+id = 1
+slug = "epic-engine-foundation"
+title = "Engine answers on the socket"
+description = "A signed fruitlockerd, registered as a LaunchAgent, boots in AD-16 order, gates on Apple 1.7.1 and answers docker version and docker info on its 0600 socket; CI runs core tests against fakes."
+covers = ["R4", "R10", "R13"]
+ads = ["AD-1", "AD-2", "AD-6", "AD-11", "AD-12", "AD-13", "AD-16", "AD-17", "AD-18"]
+
+[[epic]]
+id = 2
+slug = "epic-images"
+title = "Images move through Apple's store"
+description = "docker pull, images, tag, rmi, push, load, save and login work through FLRegistry and Apple's image store, credentials never stored."
+covers = ["R2", "R7", "R10"]
+ads = ["AD-4", "AD-5", "AD-6", "AD-7", "AD-11", "AD-12", "AD-14"]
+after = [{ epic = 1, needs = "socket, store and migrations, field table, EventBus" }]
+
+[[epic]]
+id = 3
+slug = "epic-containers"
+title = "Containers run, stop and report"
+description = "docker run, ps, inspect, stop, kill, rm, wait, rename, pause, stats, cp and published ports work; the poller feeds /events with exactly one die per run; boot reconcile adopts and sweeps."
+covers = ["R2", "R5", "R10", "R13"]
+ads = ["AD-3", "AD-4", "AD-6", "AD-7", "AD-10", "AD-11", "AD-16", "AD-19"]
+after = [{ epic = 2, needs = "pulled images and image references" }]
+
+[[epic]]
+id = 4
+slug = "epic-networks"
+title = "User networks for Compose"
+description = "docker network create, ls, inspect, rm, prune, and connect or disconnect on stopped containers work; the bridge network exists at boot; Compose creates its project network."
+covers = ["R2", "R9", "R10"]
+ads = ["AD-3", "AD-4", "AD-6", "AD-7", "AD-11", "AD-16", "AD-19"]
+after = [{ epic = 3, needs = "ContainerService, materialization and its attachment extension point; this epic adds container to network rows" }]
+
+[[epic]]
+id = 5
+slug = "epic-compose-dns"
+title = "Compose services resolve each other by name"
+description = "fruitlocker-helper hands the daemon one gateway :53 socket per user network under the AD-10 guard; FLDNS answers service names and aliases from one DNSView."
+covers = ["R12"]
+ads = ["AD-1", "AD-6", "AD-8", "AD-9", "AD-10", "AD-17", "AD-21"]
+spikes = ["#14", "#8"]
+after = [{ epic = 4, needs = "user-defined networks and attachments" }, { epic = 1, needs = "signed bundle that can register a LaunchDaemon" }]
+
+[[epic]]
+id = 6
+slug = "epic-volumes"
+title = "Named volumes persist across containers"
+description = "docker volume create, ls, inspect, rm, prune and -v mounts work on Apple's volume store, with in-use checks and a loud error if shared mounts are unsupported."
+covers = ["R2", "R9", "R10"]
+ads = ["AD-3", "AD-4", "AD-5", "AD-6", "AD-7", "AD-11"]
+spikes = ["#13"]
+after = [{ epic = 3, needs = "container create and materialization" }, { epic = 4, needs = "the canonical ContainerConfiguration with attachments, so mounts join one specHash and the network-then-volume lock order" }]
+
+[[epic]]
+id = 7
+slug = "epic-logs-exec"
+title = "Logs, attach and exec"
+description = "docker logs, attach and exec -it, and Compose logs and exec, read one log source and use the hijack child channel with TTY resize."
+covers = ["R2", "R6", "R10"]
+ads = ["AD-6", "AD-20"]
+spikes = ["#12"]
+after = [{ epic = 3, needs = "running containers and ContainerService" }, { epic = 4, needs = "Compose project network for the pinned logs and exec sample" }]
+
+[[epic]]
+id = 8
+slug = "epic-restart-health"
+title = "Restart policies and healthchecks"
+description = "RestartController and HealthController give Docker's restart policies and healthchecks, including the daemon-start restart path, and Compose depends_on service_healthy works."
+covers = ["R11", "R10"]
+ads = ["AD-3", "AD-6", "AD-8", "AD-16"]
+after = [{ epic = 3, needs = "observed state, runEpoch and the record-exit function" }, { epic = 7, needs = "the log source wired into start, so a policy restart keeps one log" }, { epic = 4, needs = "Compose project network for the service_healthy sample" }]
+
+[[epic]]
+id = 9
+slug = "epic-build"
+title = "docker build and Compose build"
+description = "docker build and Compose build produce an image in Apple's store with BuildKit progress, per the path the build spike proves."
+covers = ["R2", "R8"]
+ads = ["AD-5", "AD-11", "AD-14"]
+spikes = ["#11"]
+after = [{ epic = 2, needs = "Apple image store adapter and registry auth" }, { epic = 3, needs = "docker run to prove the built image runs" }]
+
+[[epic]]
+id = 10
+slug = "epic-app"
+title = "Native app runs the engine"
+description = "The SwiftUI menu-bar app starts and stops the engine, groups objects by Compose project, streams logs, opens a shell and sets the fruitlocker Docker context with an undo."
+covers = ["R14", "R15", "R16"]
+ads = ["AD-1", "AD-13", "AD-15"]
+after = [{ epic = 7, needs = "one log source and exec for log view and shell" }, { epic = 4, needs = "network endpoints for the views" }, { epic = 6, needs = "volume endpoints for the views" }]
+
+[[epic]]
+id = 11
+slug = "epic-compat-matrix"
+title = "Public compatibility matrix"
+description = "Pinned Compose samples and gate-command tests run on a self-hosted Apple silicon runner and publish a pass rate of 80% or better."
+covers = ["R1", "R2", "R3"]
+ads = ["AD-12"]
+after = [{ epic = 5, needs = "service-name DNS" }, { epic = 6, needs = "volumes" }, { epic = 7, needs = "logs and exec" }, { epic = 8, needs = "healthchecks for depends_on" }, { epic = 9, needs = "build, or Josh's amended gate" }]
+
+[[epic]]
+id = 12
+slug = "epic-release"
+title = "Signed release, updates and uninstall"
+description = "A notarized build ships as a direct download that Sparkle updates and as a Homebrew cask, and one uninstall path restores the Docker context."
+covers = ["R17", "R18"]
+ads = ["AD-1", "AD-15"]
+spikes = ["#15"]
+after = [{ epic = 10, needs = "the app and its context handling" }, { epic = 11, needs = "a passing matrix for the release gate" }]
