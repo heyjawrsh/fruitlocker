@@ -1,6 +1,6 @@
 ---
 title: "Spike #4: Compose service discovery on Apple container"
-status: done (recovery check pending reboot)
+status: done
 date: 2026-11-12
 issue: heyjawrsh/fruitlocker#4
 evidence: spikes/4-compose-dns/ (commit dab8b2a)
@@ -100,4 +100,4 @@ The trick depends on undocumented mDNSResponder and InternetSharing behavior, an
 - Split-DNS forwarding was parsed but no query exercised it.
 - Coexistence with other vmnet users (Orchard, Lima, Internet Sharing) is untested.
 - The firewall-prompt behavior is unknown.
-- After the reboot: confirm `container system start` works and a fresh container resolves `example.com`, then remove the spike containers and networks.
+- Recovery confirmed 2026-11-13: after a reboot, `container system start` works, a fresh container resolves `example.com` via the gateway, and mDNSResponder holds udp4 and udp6 `*:53` again. Spike containers and networks removed.
