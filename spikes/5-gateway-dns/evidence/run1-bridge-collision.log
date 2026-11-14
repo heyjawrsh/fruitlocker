@@ -1,0 +1,119 @@
+## 1. setup: a1 on fl5_a, b1 on fl5_b, d1 on default; baseline via mDNSResponder
+gateways: a=192.168.64.1 b=192.168.65.1 default=192.168.66.1
+  fl5-a1 example.com ->ERROR
+  fl5-a1 fl5-probe ->ERROR
+  fl5-b1 example.com -> 104.20.23.154 172.66.147.243
+  fl5-b1 fl5-probe -> NXDOMAIN
+  fl5-d1 example.com -> 104.20.23.154 172.66.147.243
+  fl5-d1 fl5-probe -> NXDOMAIN
+-- :53 sockets
+   udp6 *.53
+   udp4 *.53
+## 2. helper binds fl5_a's gateway only
+-- ctl: up 192.168.64.1
+-- :53 sockets
+   udp6 *.53
+   udp4 *.53
+-- helper log (new lines)
+   21:24:29 192.168.64.1: waiting: address not on any interface
+  fl5-a1 fl5-probe ->ERROR
+  fl5-a1 example.com ->ERROR
+  fl5-b1 fl5-probe -> NXDOMAIN
+  fl5-b1 example.com -> 104.20.23.154 172.66.147.243
+  fl5-d1 fl5-probe -> NXDOMAIN
+  fl5-d1 example.com -> 104.20.23.154 172.66.147.243
+-- helper log (new lines)
+## 3. helper releases: fl5_a falls straight back to mDNSResponder
+-- ctl: <empty>
+  fl5-a1 example.com ->ERROR
+  fl5-a1 fl5-probe ->ERROR
+-- :53 sockets
+   udp6 *.53
+   udp4 *.53
+-- helper log (new lines)
+## 4. 10 up/down cycles, querying in each state
+  cycle 1 FAIL:   fl5-a1 fl5-probe ->ERROR |   fl5-a1 example.com ->ERROR |   fl5-a1 example.com ->ERROR |   fl5-a1 fl5-probe ->ERROR
+  cycle 2 FAIL:   fl5-a1 fl5-probe ->ERROR |   fl5-a1 example.com ->ERROR |   fl5-a1 example.com ->ERROR |   fl5-a1 fl5-probe ->ERROR
+  cycle 3 FAIL:   fl5-a1 fl5-probe ->ERROR |   fl5-a1 example.com ->ERROR |   fl5-a1 example.com ->ERROR |   fl5-a1 fl5-probe ->ERROR
+  cycle 4 FAIL:   fl5-a1 fl5-probe ->ERROR |   fl5-a1 example.com ->ERROR |   fl5-a1 example.com ->ERROR |   fl5-a1 fl5-probe ->ERROR
+  cycle 5 FAIL:   fl5-a1 fl5-probe ->ERROR |   fl5-a1 example.com ->ERROR |   fl5-a1 example.com ->ERROR |   fl5-a1 fl5-probe ->ERROR
+  cycle 6 FAIL:   fl5-a1 fl5-probe ->ERROR |   fl5-a1 example.com ->ERROR |   fl5-a1 example.com ->ERROR |   fl5-a1 fl5-probe ->ERROR
+  cycle 7 FAIL:   fl5-a1 fl5-probe ->ERROR |   fl5-a1 example.com ->ERROR |   fl5-a1 example.com ->ERROR |   fl5-a1 fl5-probe ->ERROR
+  cycle 8 FAIL:   fl5-a1 fl5-probe ->ERROR |   fl5-a1 example.com ->ERROR |   fl5-a1 example.com ->ERROR |   fl5-a1 fl5-probe ->ERROR
+  cycle 9 FAIL:   fl5-a1 fl5-probe ->ERROR |   fl5-a1 example.com ->ERROR |   fl5-a1 example.com ->ERROR |   fl5-a1 fl5-probe ->ERROR
+  cycle 10 FAIL:   fl5-a1 fl5-probe ->ERROR |   fl5-a1 example.com ->ERROR |   fl5-a1 example.com ->ERROR |   fl5-a1 fl5-probe ->ERROR
+  cycles passed: 0/10
+-- :53 sockets
+   udp6 *.53
+   udp4 *.53
+## 5. two gateways at once; default network untouched
+-- ctl: up 192.168.64.1
+up 192.168.65.1
+  fl5-a1 fl5-probe ->ERROR
+  fl5-b1 fl5-probe -> 10.55.55.55
+  fl5-d1 fl5-probe -> NXDOMAIN
+  fl5-d1 example.com -> 104.20.23.154 172.66.147.243
+-- helper log (new lines)
+   21:28:54 192.168.65.1: BOUND SO_REUSEADDR (plain bind got EADDRINUSE)
+   21:29:00 192.168.65.2 -> 192.168.65.1 fl5-probe type=1 probe
+## 6. guest restart with the helper holding fl5_a
+-- ctl: up 192.168.64.1
+
+$ container stop fl5-a1
+fl5-a1
+[exit 0]
+-- bridges: lo0 gif0 stf0 anpi2 anpi0 anpi1 en4 en5 en7 en1 en2 en3 bridge0 en6 pktap0 ap1 en0 awdl0 llw0 utun0 utun1 utun2 utun3 utun4 utun5 utun6 utun7 utun8 vmenet1 bridge101 vmenet2
+-- helper log (new lines)
+   21:29:01 192.168.65.1: CLOSED (not requested)
+
+$ container start fl5-a1
+fl5-a1
+[exit 0]
+  fl5-a1 fl5-probe -> 10.55.55.55
+  fl5-a1 example.com -> 104.20.23.154 172.66.147.243
+-- helper log (new lines)
+   21:29:14 192.168.64.1: BOUND SO_REUSEADDR (plain bind got EADDRINUSE)
+   21:29:18 192.168.64.3 -> 192.168.64.1 fl5-probe type=1 probe
+   21:29:18 192.168.64.3 -> 192.168.64.1 example.com type=1 forward 10.79.79.254
+## 7. all guests stop with the helper still asking for fl5_a; then restart
+
+$ container stop fl5-a1 fl5-b1 fl5-d1
+fl5-d1
+fl5-a1
+fl5-b1
+[exit 0]
+-- after stop (2s)
+-- :53 sockets
+-- helper log (new lines)
+   21:29:27 192.168.64.1: CLOSED (interface gone)
+   21:29:27 192.168.64.1: waiting: address not on any interface
+
+$ container start fl5-d1
+fl5-d1
+[exit 0]
+  fl5-d1 example.com -> 104.20.23.154 172.66.147.243
+-- :53 sockets
+   udp6 *.53
+   udp4 *.53
+
+$ container start fl5-a1
+fl5-a1
+[exit 0]
+  fl5-a1 fl5-probe -> 10.55.55.55
+  fl5-a1 example.com -> 172.66.147.243 104.20.23.154
+  fl5-d1 example.com ->ERROR
+-- :53 sockets
+   udp4 192.168.64.1.53
+   udp6 *.53
+   udp4 *.53
+-- helper log (new lines)
+   21:29:39 192.168.64.1: BOUND SO_REUSEADDR (plain bind got EADDRINUSE)
+   21:29:41 192.168.64.4 -> 192.168.64.1 fl5-probe type=1 probe
+   21:29:42 192.168.64.4 -> 192.168.64.1 example.com type=1 forward 10.79.79.254
+## 8. release and clean up
+-- ctl: <empty>
+  fl5-a1 example.com -> 104.20.23.154 172.66.147.243
+  fl5-d1 example.com ->ERROR
+-- :53 sockets
+-- helper log (new lines)
+   21:29:48 192.168.64.1: CLOSED (not requested)
