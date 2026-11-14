@@ -1,0 +1,4 @@
+flbuildkitd/bin/
+evidence/*.tar
+evidence/shim.out
+evidence/engine.log

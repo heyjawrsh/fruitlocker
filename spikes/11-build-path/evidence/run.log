@@ -1,0 +1,490 @@
+== versions
+docker 29.9.3
+github.com/docker/buildx v0.38.1 0dbe87f36ed472fe36b6796c3f70b4210a731fc5
+Docker Compose version v5.7.0
+container CLI version 1.7.1 (build: release, commit: a15b460)
+== 1. stock BuildKit in an Apple container, used only to build the custom image
+fl11-stock
+== 2. build custom buildkitd (moby exporter) and its image
+/Users/jawrsh/Work/OSS/fruitlocker/spikes/11-build-path/flbuildkitd
+/Users/jawrsh/Work/OSS/fruitlocker/spikes/11-build-path/flbuildkitd
+#0 building with "fl11-stock" instance using remote driver
+
+#1 [internal] load build definition from Dockerfile.image
+#1 transferring dockerfile: 108B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/moby/buildkit:v0.35.0
+#2 DONE 5.7s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 57B done
+#3 DONE 0.0s
+
+#4 [1/2] FROM docker.io/moby/buildkit:v0.35.0@sha256:aa632b921ef07411d2cb77292cd34213d4f7b384001d6fceef1e1f25bf9752bb
+#4 resolve docker.io/moby/buildkit:v0.35.0@sha256:aa632b921ef07411d2cb77292cd34213d4f7b384001d6fceef1e1f25bf9752bb done
+#4 ...
+
+#5 [internal] load build context
+#5 transferring context: 76.93MB 0.2s done
+#5 DONE 0.2s
+
+#4 [1/2] FROM docker.io/moby/buildkit:v0.35.0@sha256:aa632b921ef07411d2cb77292cd34213d4f7b384001d6fceef1e1f25bf9752bb
+#4 sha256:480db2464481d002587627beb1d75a9b33db4f0fc1f45f95184c395ae1494163 268B / 268B 0.1s done
+#4 sha256:b1e4eedaaf947b9b0603d47aca632ca79a566a6f092140ef134962a8da7a9ec5 0B / 88.69MB 0.2s
+#4 sha256:a9f7f894e872b46df95acfb1eeed46ab53f2e309801c7a523d4bbe8c1faaa250 611B / 611B 0.2s done
+#4 sha256:2a14e7cc4d28e7b28e478c4a7974cea901cdd0223f4eff331515daf6147f241a 0B / 104.67kB 0.2s
+#4 sha256:6820382965198c832be8bd7433e500adb0a601dd6896db7506eade7ec7d55083 0B / 939B 0.2s
+#4 sha256:2a14e7cc4d28e7b28e478c4a7974cea901cdd0223f4eff331515daf6147f241a 104.67kB / 104.67kB 0.4s done
+#4 sha256:83e90ea0fdbe531ad2f62cc44603b55376533247a18b8b113380c86d5f024f35 0B / 11.96MB 0.2s
+#4 sha256:6820382965198c832be8bd7433e500adb0a601dd6896db7506eade7ec7d55083 939B / 939B 0.3s done
+#4 sha256:b90627b8f4292fd3cb63f0f27f0b11c37f04ba88ef3b78d4948ea0ace18c85e9 0B / 4.19MB 0.2s
+#4 sha256:b1e4eedaaf947b9b0603d47aca632ca79a566a6f092140ef134962a8da7a9ec5 6.29MB / 88.69MB 0.6s
+#4 sha256:83e90ea0fdbe531ad2f62cc44603b55376533247a18b8b113380c86d5f024f35 1.05MB / 11.96MB 0.6s
+#4 sha256:b90627b8f4292fd3cb63f0f27f0b11c37f04ba88ef3b78d4948ea0ace18c85e9 1.05MB / 4.19MB 0.5s
+#4 sha256:b1e4eedaaf947b9b0603d47aca632ca79a566a6f092140ef134962a8da7a9ec5 13.64MB / 88.69MB 0.9s
+#4 sha256:b1e4eedaaf947b9b0603d47aca632ca79a566a6f092140ef134962a8da7a9ec5 18.87MB / 88.69MB 1.1s
+#4 sha256:83e90ea0fdbe531ad2f62cc44603b55376533247a18b8b113380c86d5f024f35 2.10MB / 11.96MB 0.9s
+#4 sha256:b90627b8f4292fd3cb63f0f27f0b11c37f04ba88ef3b78d4948ea0ace18c85e9 2.10MB / 4.19MB 0.8s
+#4 sha256:b1e4eedaaf947b9b0603d47aca632ca79a566a6f092140ef134962a8da7a9ec5 24.12MB / 88.69MB 1.2s
+#4 sha256:b90627b8f4292fd3cb63f0f27f0b11c37f04ba88ef3b78d4948ea0ace18c85e9 3.15MB / 4.19MB 0.9s
+#4 sha256:83e90ea0fdbe531ad2f62cc44603b55376533247a18b8b113380c86d5f024f35 3.15MB / 11.96MB 1.2s
+#4 sha256:b1e4eedaaf947b9b0603d47aca632ca79a566a6f092140ef134962a8da7a9ec5 31.46MB / 88.69MB 1.5s
+#4 sha256:83e90ea0fdbe531ad2f62cc44603b55376533247a18b8b113380c86d5f024f35 4.19MB / 11.96MB 1.4s
+#4 sha256:b90627b8f4292fd3cb63f0f27f0b11c37f04ba88ef3b78d4948ea0ace18c85e9 4.19MB / 4.19MB 1.1s done
+#4 extracting sha256:b90627b8f4292fd3cb63f0f27f0b11c37f04ba88ef3b78d4948ea0ace18c85e9 0.1s done
+#4 sha256:b1e4eedaaf947b9b0603d47aca632ca79a566a6f092140ef134962a8da7a9ec5 41.94MB / 88.69MB 1.8s
+#4 sha256:b1e4eedaaf947b9b0603d47aca632ca79a566a6f092140ef134962a8da7a9ec5 47.19MB / 88.69MB 2.0s
+#4 sha256:83e90ea0fdbe531ad2f62cc44603b55376533247a18b8b113380c86d5f024f35 5.24MB / 11.96MB 1.7s
+#4 sha256:b1e4eedaaf947b9b0603d47aca632ca79a566a6f092140ef134962a8da7a9ec5 52.43MB / 88.69MB 2.1s
+#4 sha256:83e90ea0fdbe531ad2f62cc44603b55376533247a18b8b113380c86d5f024f35 6.29MB / 11.96MB 1.8s
+#4 sha256:b1e4eedaaf947b9b0603d47aca632ca79a566a6f092140ef134962a8da7a9ec5 57.67MB / 88.69MB 2.3s
+#4 sha256:83e90ea0fdbe531ad2f62cc44603b55376533247a18b8b113380c86d5f024f35 7.34MB / 11.96MB 2.0s
+#4 sha256:83e90ea0fdbe531ad2f62cc44603b55376533247a18b8b113380c86d5f024f35 8.39MB / 11.96MB 2.1s
+#4 sha256:b1e4eedaaf947b9b0603d47aca632ca79a566a6f092140ef134962a8da7a9ec5 67.11MB / 88.69MB 2.6s
+#4 sha256:83e90ea0fdbe531ad2f62cc44603b55376533247a18b8b113380c86d5f024f35 9.44MB / 11.96MB 2.3s
+#4 sha256:83e90ea0fdbe531ad2f62cc44603b55376533247a18b8b113380c86d5f024f35 10.49MB / 11.96MB 2.4s
+#4 sha256:b1e4eedaaf947b9b0603d47aca632ca79a566a6f092140ef134962a8da7a9ec5 77.59MB / 88.69MB 2.9s
+#4 sha256:83e90ea0fdbe531ad2f62cc44603b55376533247a18b8b113380c86d5f024f35 11.96MB / 11.96MB 2.6s done
+#4 extracting sha256:83e90ea0fdbe531ad2f62cc44603b55376533247a18b8b113380c86d5f024f35
+#4 sha256:b1e4eedaaf947b9b0603d47aca632ca79a566a6f092140ef134962a8da7a9ec5 83.89MB / 88.69MB 3.0s
+#4 extracting sha256:83e90ea0fdbe531ad2f62cc44603b55376533247a18b8b113380c86d5f024f35 0.2s done
+#4 extracting sha256:6820382965198c832be8bd7433e500adb0a601dd6896db7506eade7ec7d55083 done
+#4 extracting sha256:2a14e7cc4d28e7b28e478c4a7974cea901cdd0223f4eff331515daf6147f241a done
+#4 sha256:b1e4eedaaf947b9b0603d47aca632ca79a566a6f092140ef134962a8da7a9ec5 88.69MB / 88.69MB 3.2s done
+#4 extracting sha256:b1e4eedaaf947b9b0603d47aca632ca79a566a6f092140ef134962a8da7a9ec5
+#4 extracting sha256:b1e4eedaaf947b9b0603d47aca632ca79a566a6f092140ef134962a8da7a9ec5 0.8s done
+#4 DONE 4.1s
+
+#4 [1/2] FROM docker.io/moby/buildkit:v0.35.0@sha256:aa632b921ef07411d2cb77292cd34213d4f7b384001d6fceef1e1f25bf9752bb
+#4 extracting sha256:a9f7f894e872b46df95acfb1eeed46ab53f2e309801c7a523d4bbe8c1faaa250 done
+#4 extracting sha256:480db2464481d002587627beb1d75a9b33db4f0fc1f45f95184c395ae1494163 done
+#4 DONE 4.1s
+
+#6 [2/2] COPY bin/buildkitd /usr/bin/buildkitd
+#6 DONE 0.2s
+
+#7 exporting to oci image format
+#7 exporting layers
+#7 exporting layers 1.5s done
+#7 exporting manifest sha256:1cd7d8f7fe913b7156a592da87c15c4aa61507aa7b4d152675742d4db65eb9fa done
+#7 exporting config sha256:f405e9ef39c8663b2fd1283733219c6f71bf07291443b4848a809ebedc468c91 done
+#7 sending tarball
+#7 sending tarball 0.3s done
+#7 DONE 1.8s
+
+View build details: docker-desktop://dashboard/build/fl11-stock/fl11-stock0/63itdzvo9uoxodkv2kxuwd6jd
+docker.io/fruitlocker/buildkit:spike
+PASS custom image loaded
+== 3. start custom builder: all caps, state on a volume (overlayfs), drop dir
+PASS builder uses overlayfs
+== 4. stand-in engine + context
+== 5. docker build, no flags (default docker driver)
+#0 building with "fl11" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 454B done
+#1 DONE 0.0s
+
+#2 resolve image config for docker-image://docker.io/docker/dockerfile:1
+#2 DONE 1.0s
+
+#3 docker-image://docker.io/docker/dockerfile:1@sha256:4edf897a3ffa55b89f906fc8cc78afdb3f1834cc9c7083565e611a8a7d5fe99e
+#3 resolve docker.io/docker/dockerfile:1@sha256:4edf897a3ffa55b89f906fc8cc78afdb3f1834cc9c7083565e611a8a7d5fe99e done
+#3 sha256:c3fba84503b044ce5cd182dd0150892f3b0eff1350c4c5d7f5ca2066da594550 0B / 13.13MB 0.2s
+#3 sha256:c3fba84503b044ce5cd182dd0150892f3b0eff1350c4c5d7f5ca2066da594550 1.05MB / 13.13MB 0.3s
+#3 sha256:c3fba84503b044ce5cd182dd0150892f3b0eff1350c4c5d7f5ca2066da594550 5.24MB / 13.13MB 0.5s
+#3 sha256:c3fba84503b044ce5cd182dd0150892f3b0eff1350c4c5d7f5ca2066da594550 11.53MB / 13.13MB 0.6s
+#3 sha256:c3fba84503b044ce5cd182dd0150892f3b0eff1350c4c5d7f5ca2066da594550 13.13MB / 13.13MB 0.7s done
+#3 extracting sha256:c3fba84503b044ce5cd182dd0150892f3b0eff1350c4c5d7f5ca2066da594550 0.1s done
+#3 DONE 0.8s
+
+#4 [internal] load metadata for docker.io/library/alpine:3.20
+#4 DONE 0.6s
+
+#5 [internal] load .dockerignore
+#5 transferring context: 2B done
+#5 DONE 0.0s
+
+#6 [internal] load build context
+#6 transferring context: 43B done
+#6 DONE 0.0s
+
+#7 [build 1/4] FROM docker.io/library/alpine:3.20@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc
+#7 resolve docker.io/library/alpine:3.20@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc done
+#7 sha256:3f26bc2dec0b515f1c2818f6e13a8f1da1f88179a008445d4e587233386bff78 2.10MB / 4.09MB 0.2s
+#7 sha256:3f26bc2dec0b515f1c2818f6e13a8f1da1f88179a008445d4e587233386bff78 4.09MB / 4.09MB 0.2s done
+#7 extracting sha256:3f26bc2dec0b515f1c2818f6e13a8f1da1f88179a008445d4e587233386bff78 0.0s done
+#7 DONE 0.3s
+
+#8 [build 2/4] RUN --mount=type=cache,target=/var/cache/apk apk add --no-cache curl >/dev/null && echo "hello from build" > /out.txt
+#8 DONE 2.4s
+
+#9 [build 3/4] RUN --mount=type=secret,id=tok sh -c 'test -s /run/secrets/tok && echo secret-ok >> /out.txt'
+#9 DONE 0.0s
+
+#10 [build 4/4] COPY app.txt /app.txt
+#10 DONE 0.0s
+
+#11 [stage-1 2/2] COPY --from=build /out.txt /app.txt /srv/
+#11 DONE 0.0s
+
+#12 exporting to image
+#12 exporting layers 0.0s done
+#12 exporting manifest sha256:be8181a43dfdf3086c4bcf4eaafac4788a5bed65129af5b920694e8955d3ae65 done
+#12 exporting config sha256:fbb71fcf8188aa6ae3cfe0b6f6f476149454f3d3da9445d25c0bfb28ddb4adb3 done
+#12 exporting attestation manifest sha256:de18259619dc56e3a849e44104f291db3fbf614326c0c5fb35786d6c000e408a done
+#12 exporting manifest list sha256:fda85440f1f1c0f458d1e4fb1da5dcad14bfd4c4ff304607a718846bbd89ae29 done
+#12 fruitlocker: loading into Apple image store
+#12 fruitlocker: loading into Apple image store 0.3s done
+#12 DONE 0.4s
+
+View build details: docker-desktop://dashboard/build/fl11/fl11/b03m7410za2270ku6qkoztrht
+PASS docker build -t loads into Apple store
+== 6. buildx build --load
+#0 building with "fl11" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 454B done
+#1 DONE 0.0s
+
+#2 resolve image config for docker-image://docker.io/docker/dockerfile:1
+#2 DONE 0.2s
+
+#3 docker-image://docker.io/docker/dockerfile:1@sha256:4edf897a3ffa55b89f906fc8cc78afdb3f1834cc9c7083565e611a8a7d5fe99e
+#3 resolve docker.io/docker/dockerfile:1@sha256:4edf897a3ffa55b89f906fc8cc78afdb3f1834cc9c7083565e611a8a7d5fe99e done
+#3 CACHED
+
+#4 [internal] load metadata for docker.io/library/alpine:3.20
+#4 DONE 0.2s
+
+#5 [internal] load .dockerignore
+#5 transferring context: 2B done
+#5 DONE 0.0s
+
+#6 [build 1/4] FROM docker.io/library/alpine:3.20@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc
+#6 resolve docker.io/library/alpine:3.20@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc done
+#6 DONE 0.0s
+
+#7 [internal] load build context
+#7 transferring context: 28B done
+#7 DONE 0.0s
+
+#8 [build 2/4] RUN --mount=type=cache,target=/var/cache/apk apk add --no-cache curl >/dev/null && echo "hello from build" > /out.txt
+#8 CACHED
+
+#9 [build 4/4] COPY app.txt /app.txt
+#9 CACHED
+
+#10 [build 3/4] RUN --mount=type=secret,id=tok sh -c 'test -s /run/secrets/tok && echo secret-ok >> /out.txt'
+#10 CACHED
+
+#11 [stage-1 2/2] COPY --from=build /out.txt /app.txt /srv/
+#11 CACHED
+
+#12 exporting to image
+#12 exporting layers done
+#12 exporting manifest sha256:be8181a43dfdf3086c4bcf4eaafac4788a5bed65129af5b920694e8955d3ae65 done
+#12 exporting config sha256:fbb71fcf8188aa6ae3cfe0b6f6f476149454f3d3da9445d25c0bfb28ddb4adb3 done
+#12 exporting attestation manifest sha256:22421a2683d7b28c197d23c33971e463b3bc12f0dce9a837fbc3e6ee80aba389 done
+#12 exporting manifest list sha256:e60ccab2912ad17001a70bb8f214260837f7fe89b3dfde14ecb655563436c01a done
+#12 fruitlocker: loading into Apple image store 0.1s done
+#12 DONE 0.1s
+
+View build details: docker-desktop://dashboard/build/fl11/fl11/njxpvt6su82tis474ak26ah4m
+PASS buildx --load
+== 7. buildx build --output type=oci (client-side export)
+#0 building with "fl11" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 454B done
+#1 DONE 0.0s
+
+#2 resolve image config for docker-image://docker.io/docker/dockerfile:1
+#2 DONE 0.1s
+
+#3 docker-image://docker.io/docker/dockerfile:1@sha256:4edf897a3ffa55b89f906fc8cc78afdb3f1834cc9c7083565e611a8a7d5fe99e
+#3 resolve docker.io/docker/dockerfile:1@sha256:4edf897a3ffa55b89f906fc8cc78afdb3f1834cc9c7083565e611a8a7d5fe99e done
+#3 CACHED
+
+#4 [internal] load metadata for docker.io/library/alpine:3.20
+#4 DONE 0.1s
+
+#5 [internal] load .dockerignore
+#5 transferring context: 2B done
+#5 DONE 0.0s
+
+#6 [build 1/4] FROM docker.io/library/alpine:3.20@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc
+#6 resolve docker.io/library/alpine:3.20@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc done
+#6 DONE 0.0s
+
+#7 [internal] load build context
+#7 transferring context: 28B done
+#7 DONE 0.0s
+
+#8 [build 2/4] RUN --mount=type=cache,target=/var/cache/apk apk add --no-cache curl >/dev/null && echo "hello from build" > /out.txt
+#8 CACHED
+
+#9 [build 3/4] RUN --mount=type=secret,id=tok sh -c 'test -s /run/secrets/tok && echo secret-ok >> /out.txt'
+#9 CACHED
+
+#10 [build 4/4] COPY app.txt /app.txt
+#10 CACHED
+
+#11 [stage-1 2/2] COPY --from=build /out.txt /app.txt /srv/
+#11 CACHED
+
+#12 exporting to oci image format
+#12 exporting layers done
+#12 exporting manifest sha256:be8181a43dfdf3086c4bcf4eaafac4788a5bed65129af5b920694e8955d3ae65 done
+#12 exporting config sha256:fbb71fcf8188aa6ae3cfe0b6f6f476149454f3d3da9445d25c0bfb28ddb4adb3 done
+#12 sending tarball 0.0s done
+#12 DONE 0.0s
+
+View build details: docker-desktop://dashboard/build/fl11/fl11/tc43d966y8n0t3jkdfv3quk7t
+PASS oci output to client
+== 8. untagged build
+sha256:79883b68b4e2fd3e70b289c4339528fe305bda124597ee5fd8b369f7f654ffcf
+PASS untagged lands as untagged@sha256
+== 9. compose build (bake), two services in parallel
+/Users/jawrsh/Work/OSS/fruitlocker/spikes/11-build-path/proj2
+ Image fl11/multi-a:1 Building 
+ Image fl11/multi-b:1 Building 
+#1 [internal] load local bake definitions
+#1 reading from stdin 1.27kB done
+#1 DONE 0.0s
+
+#2 [b internal] load build definition from Dockerfile
+#2 transferring dockerfile: 454B done
+#2 DONE 0.0s
+
+#3 [a] resolve image config for docker-image://docker.io/docker/dockerfile:1
+#3 DONE 0.1s
+
+#4 [b] docker-image://docker.io/docker/dockerfile:1@sha256:4edf897a3ffa55b89f906fc8cc78afdb3f1834cc9c7083565e611a8a7d5fe99e
+#4 resolve docker.io/docker/dockerfile:1@sha256:4edf897a3ffa55b89f906fc8cc78afdb3f1834cc9c7083565e611a8a7d5fe99e done
+#4 CACHED
+
+#5 [a internal] load metadata for docker.io/library/alpine:3.20
+#5 DONE 0.2s
+
+#6 [b internal] load .dockerignore
+#6 transferring context: 2B done
+#6 DONE 0.0s
+
+#7 [b build 1/4] FROM docker.io/library/alpine:3.20@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc
+#7 resolve docker.io/library/alpine:3.20@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc done
+#7 CACHED
+
+#8 [b internal] load build context
+#8 transferring context: 43B done
+#8 DONE 0.0s
+
+#9 [b build 2/4] RUN --mount=type=cache,target=/var/cache/apk apk add --no-cache curl >/dev/null && echo "from-b from build" > /out.txt
+#9 DONE 2.2s
+
+#10 [a build 2/4] RUN --mount=type=cache,target=/var/cache/apk apk add --no-cache curl >/dev/null && echo "from-a from build" > /out.txt
+#10 ...
+
+#11 [b build 3/4] RUN --mount=type=secret,id=tok sh -c 'test -s /run/secrets/tok && echo secret-ok >> /out.txt'
+#11 DONE 0.0s
+
+#12 [b build 4/4] COPY app.txt /app.txt
+#12 DONE 0.0s
+
+#13 [b stage-1 2/2] COPY --from=build /out.txt /app.txt /srv/
+#13 DONE 0.0s
+
+#14 [b] exporting to image
+#14 exporting layers done
+#14 exporting manifest sha256:deff638c91db90a64ecba1a9464ff7bbc523c52e37ff93b966eaab0afffd5cd4 done
+#14 exporting config sha256:b8190bf35e40194081c8e0d375e789b58f3652f0c549ad010cddcf398eeb02bf done
+#14 exporting attestation manifest sha256:81bdb7de8d5a28ec2b09315b385d14e6aafd2510e6ef5ee2644bcd6539f9ca0a done
+#14 exporting manifest list sha256:4833f0296b3bc326b51c26277cec7efbca877c33a8020575f80302efa125eff4 done
+#14 fruitlocker: loading into Apple image store 0.2s done
+#14 DONE 0.2s
+
+#10 [a build 2/4] RUN --mount=type=cache,target=/var/cache/apk apk add --no-cache curl >/dev/null && echo "from-a from build" > /out.txt
+#10 ...
+
+#15 [b] resolving provenance for metadata file
+#15 DONE 0.0s
+
+#10 [a build 2/4] RUN --mount=type=cache,target=/var/cache/apk apk add --no-cache curl >/dev/null && echo "from-a from build" > /out.txt
+#10 DONE 4.8s
+
+#16 [a build 3/4] RUN --mount=type=secret,id=tok sh -c 'test -s /run/secrets/tok && echo secret-ok >> /out.txt'
+#16 DONE 0.0s
+
+#17 [a build 4/4] COPY app.txt /app.txt
+#17 DONE 0.0s
+
+#18 [a stage-1 2/2] COPY --from=build /out.txt /app.txt /srv/
+#18 DONE 0.0s
+
+#19 [a] exporting to image
+#19 exporting layers 0.0s done
+#19 exporting manifest sha256:8f6ced768c22d5602a9748aadb407b67ef41f7f167b0c481c8a9a5c0c03dc2cf done
+#19 exporting config sha256:0986b44a5b472ed9dfe15f5f8ae876a8fd1a76cfcd34b06db302046f06a0fcd7 done
+#19 exporting attestation manifest sha256:27fa917ac5a4423e2beb64da6638493b9dde4cdd5d52ed275f553ce7252529ec done
+#19 exporting manifest list sha256:8edfa40b67d38687fab62fc36c606c73a9a1186b065e5de825d8ff13f1927531
+#19 exporting manifest list sha256:8edfa40b67d38687fab62fc36c606c73a9a1186b065e5de825d8ff13f1927531 done
+#19 fruitlocker: loading into Apple image store 0.5s done
+#19 DONE 0.5s
+
+#20 [a] resolving provenance for metadata file
+#20 DONE 0.0s
+ Image fl11/multi-a:1 Built 
+ Image fl11/multi-b:1 Built 
+PASS compose service a
+PASS compose service b
+== 10. buildx bake
+/Users/jawrsh/Work/OSS/fruitlocker/spikes/11-build-path/proj
+#0 building with "fl11" instance using docker driver
+
+#1 [internal] load local bake definitions
+#1 reading compose.yaml 138B / 138B done
+#1 DONE 0.0s
+
+#2 [internal] load build definition from Dockerfile
+#2 transferring dockerfile: 454B done
+#2 DONE 0.0s
+
+#3 resolve image config for docker-image://docker.io/docker/dockerfile:1
+#3 DONE 0.2s
+
+#4 docker-image://docker.io/docker/dockerfile:1@sha256:4edf897a3ffa55b89f906fc8cc78afdb3f1834cc9c7083565e611a8a7d5fe99e
+#4 resolve docker.io/docker/dockerfile:1@sha256:4edf897a3ffa55b89f906fc8cc78afdb3f1834cc9c7083565e611a8a7d5fe99e done
+#4 CACHED
+
+#5 [internal] load metadata for docker.io/library/alpine:3.20
+#5 DONE 0.1s
+
+#6 [internal] load .dockerignore
+#6 transferring context: 2B done
+#6 DONE 0.0s
+
+#7 [build 1/4] FROM docker.io/library/alpine:3.20@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc
+#7 resolve docker.io/library/alpine:3.20@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc done
+#7 DONE 0.0s
+
+#8 [internal] load build context
+#8 transferring context: 43B done
+#8 DONE 0.0s
+
+#9 [build 2/4] RUN --mount=type=cache,target=/var/cache/apk apk add --no-cache curl >/dev/null && echo "hello from build" > /out.txt
+#9 CACHED
+
+#10 [build 4/4] COPY app.txt /app.txt
+#10 CACHED
+
+#11 [build 3/4] RUN --mount=type=secret,id=tok sh -c 'test -s /run/secrets/tok && echo secret-ok >> /out.txt'
+#11 CACHED
+
+#12 [stage-1 2/2] COPY --from=build /out.txt /app.txt /srv/
+#12 CACHED
+
+#13 exporting to image
+#13 exporting layers done
+#13 exporting manifest sha256:be8181a43dfdf3086c4bcf4eaafac4788a5bed65129af5b920694e8955d3ae65 done
+#13 exporting config sha256:fbb71fcf8188aa6ae3cfe0b6f6f476149454f3d3da9445d25c0bfb28ddb4adb3 done
+#13 exporting attestation manifest sha256:92bb82712868aa87ea5a8001592a517312daca929dc04c5042254c0f5ae51f41 done
+#13 exporting manifest list sha256:a8391c7d6bc7f0cb893a15acced62589add004899d062fd02ac20b9c54436369 done
+#13 fruitlocker: loading into Apple image store
+#13 fruitlocker: loading into Apple image store 0.2s done
+#13 DONE 0.2s
+
+View build details: docker-desktop://dashboard/build/fl11/fl11/gxgbhzr2tbd736dru8d0u2lvf
+PASS bake
+== 11. linux/amd64 RUN
+#0 building with "fl11" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile.amd64
+#1 transferring dockerfile: 101B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/alpine:3.20
+#2 DONE 0.4s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [1/2] FROM docker.io/library/alpine:3.20@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc
+#4 resolve docker.io/library/alpine:3.20@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc done
+#4 sha256:25f1d6b1951ac8eb3740558fe94cb83d377bdadf95fd9f98b50d2e1b96130471 1.05MB / 3.63MB 0.2s
+#4 sha256:25f1d6b1951ac8eb3740558fe94cb83d377bdadf95fd9f98b50d2e1b96130471 3.63MB / 3.63MB 0.2s done
+#4 extracting sha256:25f1d6b1951ac8eb3740558fe94cb83d377bdadf95fd9f98b50d2e1b96130471 0.1s done
+#4 DONE 0.3s
+
+#5 [2/2] RUN uname -m > /arch
+#5 DONE 0.1s
+
+#6 exporting to image
+#6 exporting layers 0.0s done
+#6 exporting manifest sha256:510d3210f9c93e5f18114f9e8be6b5390483ba4cc2f1cce8ac02889cd4b825a9 done
+#6 exporting config sha256:6591a72ea5b9f0acd9ecdd06d1528cba281042c5be43bf1d53ca2e8a7bdfb79a done
+#6 exporting attestation manifest sha256:965ca96082e944103b2c63c146e367e28af5da901c308d3eda427aa1ee4c2816 done
+#6 exporting manifest list sha256:6e17e3b3af7c69735821c6cb45a91e45808c954305d7f9c290c97c429407c536 done
+#6 fruitlocker: loading into Apple image store
+#6 fruitlocker: loading into Apple image store 0.3s done
+#6 DONE 0.3s
+
+View build details: docker-desktop://dashboard/build/fl11/fl11/ksjpqxye5fxwt7ty2hmq6991z
+PASS amd64 RUN
+== 12. cache and history through /grpc
+PASS buildx du
+PASS buildx history ls
+PASS builder prune
+== engine requests (non-grpc)
+04:26:04 start
+04:26:05 GET /v1.51/version {'User-Agent': 'moby-client/v0.6.0 darwin/arm64'}
+04:26:11   handoff 6ddbf6c69816062b bytes=4108288 rc=0 loaded=['fl11/app:plain'] 0.21s
+04:26:12 GET /v1.51/version {'User-Agent': 'moby-client/v0.6.0 darwin/arm64'}
+04:26:12 GET /v1.51/info {'User-Agent': 'moby-client/v0.6.0 darwin/arm64'}
+04:26:12 GET /v1.51/version {'User-Agent': 'moby-client/v0.6.2 darwin/arm64'}
+04:26:12   handoff e8be9def617c8676 bytes=4108288 rc=0 loaded=['fl11/app:load'] 0.05s
+04:26:12 GET /v1.51/version {'User-Agent': 'moby-client/v0.6.0 darwin/arm64'}
+04:26:13 GET /v1.51/version {'User-Agent': 'moby-client/v0.6.2 darwin/arm64'}
+04:26:13 GET /v1.51/version {'User-Agent': 'moby-client/v0.6.0 darwin/arm64'}
+04:26:13 GET /v1.51/version {'User-Agent': 'moby-client/v0.6.2 darwin/arm64'}
+04:26:14   handoff 02f16f6970900e58 bytes=4108288 rc=0 loaded=['untagged@sha256:79883b68b4e2fd3e70b289c4339528fe305bda124597ee5fd8b369f7f654ffcf'] 0.08s
+04:26:14 GET /v1.51/version {'User-Agent': 'moby-client/v0.6.0 darwin/arm64'}
+04:26:14 GET /v1.51/info {'User-Agent': 'moby-client/v0.6.0 darwin/arm64'}
+04:26:15 GET /v1.51/version {'User-Agent': 'moby-client/v0.6.2 darwin/arm64'}
+04:26:15 GET /v1.51/version {'User-Agent': 'moby-client/v0.6.2 darwin/arm64'}
+04:26:17   handoff 00c61b845abc2c70 bytes=4108288 rc=0 loaded=['fl11/multi-b:1'] 0.15s
+04:26:20   handoff 2a1e81e94affccd8 bytes=4108288 rc=0 loaded=['fl11/multi-a:1'] 0.39s
+04:26:20 GET /v1.51/images/fl11/multi-a:1/json?manifests=1 {'User-Agent': 'compose/v5.7.0'}
+04:26:20   inspect fl11/multi-a:1 -> found
+04:26:20 GET /v1.51/images/fl11/multi-b:1/json?manifests=1 {'User-Agent': 'compose/v5.7.0'}
+04:26:20   inspect fl11/multi-b:1 -> found
+04:26:22 GET /v1.51/version {'User-Agent': 'moby-client/v0.6.0 darwin/arm64'}
+04:26:23 GET /v1.51/version {'User-Agent': 'moby-client/v0.6.2 darwin/arm64'}
+04:26:23   handoff 936300d535dfdf02 bytes=4108288 rc=0 loaded=['fl11/bake-app:1'] 0.05s
+04:26:23 GET /v1.51/version {'User-Agent': 'moby-client/v0.6.0 darwin/arm64'}
+04:26:23 GET /v1.51/version {'User-Agent': 'moby-client/v0.6.2 darwin/arm64'}
+04:26:24   handoff 0c1fe85daabe2a7d bytes=3645952 rc=0 loaded=['fl11/amd:1'] 0.18s
+04:26:25 GET /v1.51/version {'User-Agent': 'moby-client/v0.6.0 darwin/arm64'}
+== result: 13 passed, 0 failed
+== cleanup
