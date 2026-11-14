@@ -28,7 +28,8 @@ Supporting detail for the PRD and architecture that doesn't fit in the brief.
 
 - `/_ping`, `/version`, `/info` with version negotiation
 - Containers: create, start, stop, wait, logs, stats, archive, and attach and exec with HTTP hijacking and TTY resize
-- Images: pull, push, tag, load, save, and `/build` with BuildKit progress
+- Images: pull, push, tag, load, save
+- Build through buildx and Bake: the `/grpc` and `/session` hijacks to a daemon-owned BuildKit (spike #11). Legacy `/build` isn't served
 - Networks and volumes, with labels and filters
 - `/events`
 - `/auth`
