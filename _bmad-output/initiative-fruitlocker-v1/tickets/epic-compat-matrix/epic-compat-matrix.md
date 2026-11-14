@@ -42,5 +42,5 @@ Anyone can read which Compose samples and commands pass on which Apple `containe
 ## Notes
 
 - Open question: Who hosts the self-hosted Apple silicon runner? Josh decides before this epic starts (spine Deferred).
-- Assumption: [ASSUMPTION] Which public Compose samples are pinned is chosen when this epic is refined; earlier epics pick one sample each for their own checks.
+- Assumption: [CONFIRMED by Josh 2026-11-14] Which public Compose samples are pinned is chosen when this epic is refined; earlier epics pick one sample each for their own checks.
 - Waits on epic-compose-dns, epic-volumes, epic-logs-exec, epic-restart-health and epic-build because: the samples need names, volumes, logs, exec, healthchecks and build to pass.

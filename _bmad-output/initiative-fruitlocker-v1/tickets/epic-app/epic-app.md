@@ -45,5 +45,5 @@ A developer opens the app, sees their Compose projects and their state, tails a 
 
 - Waits on epic-logs-exec because: the log view and shell reuse its one log source and exec.
 - Waits on epic-networks and epic-volumes because: the views need their endpoints.
-- Assumption: [ASSUMPTION] Run `bmad-ux` on this epic before its stories are planned; the spine defers app UI structure to it.
-- Assumption: [ASSUMPTION] The app shell from epic-engine-foundation (signing, LaunchAgent registration) is reused here, not rebuilt.
+- Assumption: [CONFIRMED by Josh 2026-11-14] Run `bmad-ux` on this epic before its stories are planned; the spine defers app UI structure to it.
+- Assumption: [CONFIRMED by Josh 2026-11-14] The app shell from epic-engine-foundation (signing, LaunchAgent registration) is reused here, not rebuilt.

@@ -44,6 +44,6 @@ A contributor can install a dev build and point `docker` at the socket; `docker 
 
 ## Notes
 
-- Assumption: [ASSUMPTION] Developer ID signing and `SMAppService` registration belong here, not in epic-release, because AD-9 peer checks and LaunchAgent registration need a signed bundle from the start.
-- Assumption: [ASSUMPTION] A local compatibility runner on Josh's Mac is enough for each epic's integrated verification until epic-compat-matrix stands up the self-hosted runner.
-- Assumption: [ASSUMPTION] Josh holds a Developer ID certificate and Team ID usable for dev signing; setup is a hitl step on the first story that needs it.
+- Assumption: [CONFIRMED by Josh 2026-11-14] Developer ID signing and `SMAppService` registration belong here, not in epic-release, because AD-9 peer checks and LaunchAgent registration need a signed bundle from the start.
+- Assumption: [CONFIRMED by Josh 2026-11-14] A local compatibility runner on Josh's Mac is enough for each epic's integrated verification until epic-compat-matrix stands up the self-hosted runner.
+- Assumption: [CONFIRMED by Josh 2026-11-14] Josh holds a Developer ID certificate and Team ID usable for dev signing; setup is a hitl step on the first story that needs it.
