@@ -72,4 +72,15 @@ The brief rejected Socktainer with no recorded reason. Its source at v1.6.1 (202
 
 - Pass rate: **16 of 22 (73%)**, which clears the bar. Five failures are one cause, single-file bind mounts (#26). Details in `_bmad-output/socktainer-measure/`.
 - DNS report sent privately.
-- Design discussion open: socktainer/socktainer#521. The call waits on the maintainers' answer.
+- Design discussion: socktainer/socktainer#521. A maintainer (benoitf) is fine with the proposals if they work. Silent success is deliberate, because some tools abort on errors.
+
+## Decision on 3 (Josh, 2026-11-15)
+
+**Join (hybrid).** fruitlocker becomes the native app on the Engine API, with Socktainer as its backend. Engine work goes upstream as PRs:
+1. Single-file bind mounts (Compose `secrets:`), first (#26).
+2. Loud failures behind an opt-in strict mode. The lenient default stays.
+3. Persistent spec store with boot reconcile.
+4. The spike #11 build path.
+5. DNS scoping, once the private report is resolved.
+
+Fallback: if upstream stalls, build our own per the spine. AD-13 keeps the app engine-agnostic, so it carries over.
