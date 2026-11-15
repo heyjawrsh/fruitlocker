@@ -1,0 +1,24 @@
+sample	up	probe	down	secs	note
+angular	ok	ok	ok	169	
+apache-php	ok	ok	ok	25	
+django	ok	ok	ok	24	
+fastapi	ok	ok	ok	16	
+flask	ok	ok	ok	24	
+gitea-postgres	fail(1)	ok	ok	319	db-1     | Error: in 18+, these Docker images are configured to store database data in a
+nextcloud-postgres	ok	ok	ok	35	
+nextcloud-redis-mariadb	ok	ok	ok	25	
+nginx-aspnet-mysql	fail(1)	fail(000)	ok	158	 service:db:1 Error response from daemon: Something went wrong. 
+nginx-flask-mongo	ok	ok	ok	50	
+nginx-golang	ok	ok	ok	34	
+nginx-golang-mysql	fail(1)	fail(000)	ok	143	 service:db:1 Error response from daemon: Something went wrong. 
+portainer	ok	ok	ok	13	
+postgresql-pgadmin	ok	ok	ok	51	
+prometheus-grafana	ok	ok	ok	57	
+react-express-mongodb	ok	ok	ok	164	
+react-express-mysql	fail(1)	fail(000)	ok	213	 service:db:1 Error response from daemon: Something went wrong. 
+react-java-mysql	fail(1)	fail(000)	ok	251	#24 69.45 Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/maven-error-diagnostics/2.2.1/maven-error-diagnostics-2.2.1.pom
+react-nginx	ok	ok	ok	64	
+sparkjava	ok	ok	ok	80	
+sparkjava-mysql	fail(1)	fail(000)	ok	184	#13 6.981 Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/maven-error-diagnostics/2.0.9/maven-error-diagnostics-2.0.9.pom
+wordpress-mysql	ok	ok	ok	70	
+== socktainer: 16/22 pass

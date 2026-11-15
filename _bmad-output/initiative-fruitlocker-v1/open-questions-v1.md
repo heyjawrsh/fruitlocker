@@ -50,7 +50,7 @@ The brief rejected Socktainer with no recorded reason. Its source at v1.6.1 (202
 - **DNS:**
   - A security issue in its DNS server was reported privately to the maintainers on 2026-11-14. Details stay out of this repo until they publish a fix.
   - It returns one address per name, so scaled services get no multi-A.
-- **Build:** only legacy `/build` through Apple's builder, without secrets, SSH or `.dockerignore`. No `/grpc`, and `/session` errors. buildx and Bake are unproven.
+- **Build:** only legacy `/build` through Apple's builder, without secrets, SSH or `.dockerignore`. No `/grpc`, and `/session` errors. Compose builds still work, because buildx falls back to a `docker-container` builder inside Socktainer (measured, #22).
 - **Not implemented:** pause and commit. Also no app.
 - **CI:** it runs against real Apple `container` for images, networks and volumes only. No `run`, Compose or build.
 
@@ -67,3 +67,9 @@ The brief rejected Socktainer with no recorded reason. Its source at v1.6.1 (202
 1. **CI runner:** phased as recommended. A dedicated Mac mini runs as the self-hosted runner from epic-compat-matrix on, with trusted triggers only.
 2. **`--privileged`:** allowed as all capabilities inside the container's VM, never host devices. `--device` stays rejected. Socket bind mounts get a clear error until a relay spike proves forwarding fruitlocker's socket inward. This amends AD-11 and R13.
 3. **Socktainer:** measure first. Get a Compose pass rate, report the DNS exposure privately, and hold one upstream design discussion, then choose join (hybrid) or build. Epic work on the engine waits on that call. App and spikes don't.
+
+## Progress on 3 (2026-11-14)
+
+- Pass rate: **16 of 22 (73%)**, which clears the bar. Five failures are one cause, single-file bind mounts (#26). Details in `_bmad-output/socktainer-measure/`.
+- DNS report sent privately.
+- Design discussion open: socktainer/socktainer#521. The call waits on the maintainers' answer.
